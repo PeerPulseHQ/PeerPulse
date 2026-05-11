@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PeerPulse Android adaptive icon — background layer
+  Solid dark navy fill, 108×108 dp. The launcher applies its own
+  mask shape over this. Background must fill the entire 108×108
+  canvas (no padding) so masked edges look intentional.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
+  <rect width="108" height="108" fill="#050810"/>
+</svg>

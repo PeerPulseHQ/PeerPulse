@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PeerPulse horizontal lockup
+  ViewBox = 64 (mark) + 6 (gap) + 180 (wordmark).
+  Adapts color via prefers-color-scheme.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 64" fill="currentColor" color="#f3ead7" aria-label="PeerPulse">
+  <title>PeerPulse</title>
+  <style>
+    svg { color: #f3ead7; }
+    @media (prefers-color-scheme: light) { svg { color: #0c1222; } }
+  </style>
+
+  <!-- Mark -->
+  <g fill="none" stroke="currentColor">
+    <circle cx="32" cy="32" r="27" stroke-width="4" opacity="0.4"/>
+    <circle cx="32" cy="32" r="20" stroke-width="5" opacity="0.7"/>
+    <circle cx="32" cy="32" r="9"  stroke-width="8"/>
+  </g>
+  <path d="M 19 32 L 26 32 L 26 58.5 A 3.5 3.5 0 0 1 19 58.5 Z" fill="currentColor"/>
+
+  <!-- Wordmark -->
+  <text
+    x="70" y="43"
+    font-family="'IBM Plex Sans', 'IBM Plex Sans Bold', system-ui, -apple-system, sans-serif"
+    font-size="30"
+    font-weight="700"
+    letter-spacing="2.4"
+    textLength="180"
+    lengthAdjust="spacing">PEERPULSE</text>
+</svg>

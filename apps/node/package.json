@@ -1,0 +1,38 @@
+{
+  "name": "@peerpulse/node",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev":       "tsx watch src/index.ts",
+    "build":     "tsc -p tsconfig.json",
+    "start":     "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@peerpulse/core": "workspace:*",
+
+    "libp2p":                      "^3.0.0",
+    "@libp2p/websockets":          "^10.0.0",
+    "@libp2p/tcp":                 "^11.0.0",
+    "@libp2p/circuit-relay-v2":    "^4.0.0",
+    "@libp2p/noise":               "^1.0.0",
+    "@libp2p/yamux":               "^8.0.0",
+    "@libp2p/identify":            "^4.0.0",
+    "@chainsafe/libp2p-gossipsub": "^14.0.0",
+
+    "@noble/curves":  "^1.4.0",
+    "@noble/hashes":  "^1.4.0",
+
+    "uint8arrays":      "^5.1.0",
+    "multiformats":     "^13.1.0",
+    "better-sqlite3":   "^11.0.0"
+  },
+  "devDependencies": {
+    "typescript":           "^5.5.0",
+    "@types/node":          "^22.0.0",
+    "@types/better-sqlite3":"^7.6.0",
+    "tsx":                  "^4.19.0"
+  }
+}

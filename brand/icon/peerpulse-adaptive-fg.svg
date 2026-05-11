@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PeerPulse Android adaptive icon — foreground layer
+  108×108 dp canvas, mark sized to fit inside the 72×72 dp safe
+  zone (18 dp inset on every side). The launcher may mask the
+  icon to a circle, rounded square, squircle, or teardrop — all
+  shapes must show the full mark.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" aria-label="PeerPulse">
+  <title>PeerPulse</title>
+  <svg x="18" y="18" width="72" height="72" viewBox="0 0 64 64" fill="none" stroke="#f3ead7">
+    <circle cx="32" cy="32" r="27" stroke-width="4" opacity="0.4"/>
+    <circle cx="32" cy="32" r="20" stroke-width="5" opacity="0.7"/>
+    <circle cx="32" cy="32" r="9"  stroke-width="8"/>
+    <path d="M 19 32 L 26 32 L 26 58.5 A 3.5 3.5 0 0 1 19 58.5 Z" fill="#f3ead7" stroke="none"/>
+  </svg>
+</svg>

@@ -1,0 +1,105 @@
+# ── Base image ────────────────────────────────────────────────────────────────
+# Rebuilt ONLY when Expo, React Native, or native module versions change.
+# Contains: SDK + NDK + Gradle binary + pnpm install + expo prebuild + Gradle dep cache.
+# Tag with: peerpulse-android-base:expo55-rn083
+# Build with: ./docker/android-build/build-base.sh
+
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ANDROID_HOME=/opt/android-sdk
+ENV ANDROID_NDK_HOME=/opt/android-sdk/ndk/27.1.12297006
+ENV PATH="${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/36.0.0:${PATH}"
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+# Gradle pre-cached at /opt/gradle-home so no volume mount can shadow it.
+# GRADLE_VERSION must match what expo prebuild emits in gradle-wrapper.properties.
+# If it changes after an expo/RN bump, recompute GRADLE_DIST_HASH:
+#   python3 -c "
+#   import hashlib; url='https://services.gradle.org/distributions/gradle-X.Y.Z-bin.zip'
+#   h=hashlib.md5(url.encode()).digest(); n=int.from_bytes(h,'big')
+#   chars='0123456789abcdefghijklmnopqrstuvwxyz'; r=''
+#   exec('while n>0:\\n r=chars[n%36]+r\\n n//=36'); print(r)"
+ENV GRADLE_USER_HOME=/opt/gradle-home
+ENV GRADLE_VERSION=9.0.0
+ENV GRADLE_DIST_HASH=d6wjpkvcgsg3oed0qlfss3wgl
+
+# ── System packages ───────────────────────────────────────────────────────────
+
+RUN apt-get update && apt-get install -y \
+    curl wget unzip git \
+    openjdk-17-jdk \
+    python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Android SDK ───────────────────────────────────────────────────────────────
+
+RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
+    wget --progress=dot:mega \
+      https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip \
+      -O /tmp/cmdtools.zip && \
+    unzip -q /tmp/cmdtools.zip -d /tmp/cmdtools && \
+    mv /tmp/cmdtools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest && \
+    rm /tmp/cmdtools.zip
+
+RUN yes | sdkmanager --licenses && \
+    echo "→ Downloading Android SDK packages (NDK ~1.5 GB + cmake ~300 MB — expect 5-10 min)..." && \
+    sdkmanager \
+      "platform-tools" \
+      "platforms;android-36" \
+      "build-tools;36.0.0" \
+      "ndk;27.1.12297006" \
+      "cmake;3.22.1"
+
+# ── Node 22 + pnpm ────────────────────────────────────────────────────────────
+
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g pnpm@10.32.1
+
+# ── Gradle binary ─────────────────────────────────────────────────────────────
+
+RUN DIST_DIR="${GRADLE_USER_HOME}/wrapper/dists/gradle-${GRADLE_VERSION}-bin/${GRADLE_DIST_HASH}" && \
+    mkdir -p "${DIST_DIR}" && \
+    wget --progress=dot:mega \
+      "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+      -O "${DIST_DIR}/gradle-${GRADLE_VERSION}-bin.zip" && \
+    unzip -q "${DIST_DIR}/gradle-${GRADLE_VERSION}-bin.zip" -d "${DIST_DIR}" && \
+    rm "${DIST_DIR}/gradle-${GRADLE_VERSION}-bin.zip" && \
+    touch "${DIST_DIR}/gradle-${GRADLE_VERSION}-bin.zip.lck" \
+          "${DIST_DIR}/gradle-${GRADLE_VERSION}-bin.zip.ok"
+
+# ── pnpm install ──────────────────────────────────────────────────────────────
+# Copy manifests only — source files come in the build image, not here.
+
+WORKDIR /workspace
+
+COPY pnpm-workspace.yaml pnpm-lock.yaml .npmrc package.json tsconfig.base.json ./
+COPY scripts/                    scripts/
+COPY packages/core/package.json  packages/core/package.json
+COPY packages/core/tsconfig.json packages/core/tsconfig.json
+COPY apps/mobile/package.json    apps/mobile/package.json
+COPY apps/mobile/.npmrc          apps/mobile/.npmrc
+COPY apps/node/package.json      apps/node/package.json
+COPY apps/web/package.json       apps/web/package.json
+
+RUN CI=true pnpm install --frozen-lockfile
+
+# ── expo prebuild ─────────────────────────────────────────────────────────────
+# Generates android/ from app.json + installed native modules.
+# These files must be kept in sync with what's committed (they affect native output).
+
+COPY apps/mobile/app.json        apps/mobile/app.json
+COPY apps/mobile/babel.config.js apps/mobile/babel.config.js
+COPY apps/mobile/metro.config.js apps/mobile/metro.config.js
+COPY apps/mobile/index.js        apps/mobile/index.js
+COPY apps/mobile/shims/          apps/mobile/shims/
+COPY apps/mobile/assets/         apps/mobile/assets/
+
+RUN cd apps/mobile && pnpm expo prebuild --platform android --no-install
+
+# ── Gradle dependency cache ───────────────────────────────────────────────────
+# Downloads all JARs / AARs into GRADLE_USER_HOME/caches — no compilation yet.
+# This is the 300 MB that would otherwise re-download on every CI run.
+
+RUN cd apps/mobile/android && ./gradlew dependencies --no-daemon --stacktrace

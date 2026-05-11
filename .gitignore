@@ -1,0 +1,66 @@
+# Environment and secrets — never committed
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+
+# Android signing
+apps/mobile/android/app/release/
+apps/mobile/android/local.properties
+
+# Build outputs
+dist/
+.next/
+out/
+build/
+*.apk
+*.aab
+
+# Node
+node_modules/
+.pnpm-store/
+
+# Turbo
+.turbo/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+*.iml
+
+# SQLite databases
+*.db
+*.sqlite
+
+# Logs
+*.log
+npm-debug.log*
+
+# EAS
+.expo/
+eas-build-pre-install.js
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Pinata / IPFS keys
+pinata.json
+
+# Expo generated native dirs
+apps/mobile/android/
+apps/mobile/ios/
+
+private/
+
+# Relay private keys — never commit
+apps/node/platform.key
+apps/node/peer.key

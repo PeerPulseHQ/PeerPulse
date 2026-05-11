@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PeerPulse wordmark
+  IBM Plex Sans Bold, all caps, letter-spaced 0.08em.
+  Adapts color via prefers-color-scheme.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 36" fill="currentColor" color="#f3ead7" aria-label="PeerPulse">
+  <title>PeerPulse</title>
+  <style>
+    svg { color: #f3ead7; }
+    @media (prefers-color-scheme: light) { svg { color: #0c1222; } }
+  </style>
+  <text
+    x="0" y="28"
+    font-family="'IBM Plex Sans', 'IBM Plex Sans Bold', system-ui, -apple-system, sans-serif"
+    font-size="30"
+    font-weight="700"
+    letter-spacing="2.4"
+    textLength="180"
+    lengthAdjust="spacing">PEERPULSE</text>
+</svg>

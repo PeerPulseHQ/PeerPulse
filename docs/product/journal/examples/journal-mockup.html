@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PeerPulse — Journal Mockup</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0f172a;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 48px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ── Phone shell ── */
+.phone {
+  width: 390px;
+  background: #f1f5f9;
+  border-radius: 44px;
+  overflow: hidden;
+  box-shadow: 0 0 0 10px #1e293b, 0 40px 100px rgba(0,0,0,0.6);
+  position: relative;
+  height: 844px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Status bar ── */
+.status-bar {
+  background: #fff;
+  padding: 16px 28px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  flex-shrink: 0;
+}
+.status-icons { display: flex; align-items: center; gap: 5px; font-size: 11px; }
+.battery {
+  width: 22px; height: 11px;
+  border: 1.5px solid #0f172a;
+  border-radius: 3px;
+  position: relative;
+}
+.battery::after {
+  content: '';
+  position: absolute;
+  right: -5px; top: 2px;
+  width: 3px; height: 5px;
+  background: #0f172a;
+  border-radius: 0 2px 2px 0;
+}
+.battery-fill {
+  position: absolute;
+  left: 1px; top: 1px; bottom: 1px;
+  width: 80%;
+  background: #0f172a;
+  border-radius: 1px;
+}
+.signal { display: flex; align-items: flex-end; gap: 1.5px; }
+.signal span {
+  background: #0f172a;
+  border-radius: 1px;
+  width: 3px;
+}
+
+/* ── App header ── */
+.app-header {
+  background: #fff;
+  padding: 8px 20px 0;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.journal-logo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.journal-logo .bolt {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+.journal-logo .wordmark {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+.jurisdiction-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 5px 10px 5px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+}
+.jurisdiction-pill .flag { font-size: 14px; }
+.caret { font-size: 9px; color: #94a3b8; }
+
+/* ── Filter tabs ── */
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.tab.active {
+  color: #0ea5e9;
+  border-bottom-color: #0ea5e9;
+  font-weight: 600;
+}
+
+/* ── Feed ── */
+.feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scrollbar-width: none;
+}
+.feed::-webkit-scrollbar { display: none; }
+
+/* ── Card ── */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 15px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: transform 0.1s;
+  border: 1px solid transparent;
+}
+.card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.card:active { transform: scale(0.98); }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 9px;
+}
+.ws-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.ws-legislature { background: #dbeafe; color: #1d4ed8; }
+.ws-budget      { background: #fef3c7; color: #b45309; }
+.ws-executive   { background: #ede9fe; color: #6d28d9; }
+.ws-electoral   { background: #dcfce7; color: #15803d; }
+.ws-judiciary   { background: #fee2e2; color: #b91c1c; }
+
+.card-date { font-size: 11px; color: #94a3b8; }
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.38;
+  margin-bottom: 7px;
+}
+.card-summary {
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 11px;
+}
+.source-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+.src-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+.survey-chip {
+  font-size: 10px;
+  font-weight: 600;
+  color: #6366f1;
+  background: #eef2ff;
+  padding: 3px 7px;
+  border-radius: 20px;
+}
+.warn-chip {
+  font-size: 10px;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 3px 7px;
+  border-radius: 20px;
+}
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  padding: 8px 0 22px;
+  display: flex;
+  justify-content: space-around;
+  flex-shrink: 0;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  opacity: 0.45;
+  padding: 0 12px;
+}
+.nav-item.active { opacity: 1; }
+.nav-icon { font-size: 20px; }
+.nav-label { font-size: 10px; color: #64748b; font-weight: 500; }
+.nav-item.active .nav-label { color: #0ea5e9; font-weight: 600; }
+
+/* ── Detail view ── */
+#detailView {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: #f1f5f9;
+  flex-direction: column;
+  overflow: hidden;
+}
+#detailView.open { display: flex; }
+
+.detail-header {
+  background: #fff;
+  padding: 52px 20px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0ea5e9;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+.back-arrow { font-size: 16px; }
+.detail-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.detail-date { font-size: 12px; color: #94a3b8; }
+
+.detail-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: none;
+}
+.detail-scroll::-webkit-scrollbar { display: none; }
+
+.detail-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+/* Sections */
+.section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 15px;
+}
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+.summary-text {
+  font-size: 13.5px;
+  color: #334155;
+  line-height: 1.68;
+}
+
+/* Key points */
+.key-point {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.key-point:first-child { padding-top: 0; }
+.key-point:last-child { border-bottom: none; padding-bottom: 0; }
+.kp-bullet {
+  width: 6px; height: 6px;
+  background: #0ea5e9;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.kp-body { flex: 1; }
+.kp-text { font-size: 13px; color: #1e293b; line-height: 1.55; }
+.kp-ref { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+
+/* Citations */
+.citation {
+  padding: 9px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.citation:first-child { padding-top: 0; }
+.citation:last-child { border-bottom: none; padding-bottom: 0; }
+.cite-source {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #0ea5e9;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.cite-link-icon { font-size: 10px; opacity: 0.7; }
+.cite-excerpt {
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+  line-height: 1.5;
+  border-left: 2px solid #e2e8f0;
+  padding-left: 9px;
+}
+.cite-unverified { color: #f59e0b; font-style: normal; font-weight: 500; }
+
+/* Poll CTA */
+.survey-cta {
+  background: linear-gradient(135deg, #6366f1 0%, #0ea5e9 100%);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+}
+.survey-cta-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 5px;
+}
+.survey-cta-q {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+.survey-cta-pub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 13px;
+}
+.survey-cta-btn {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* Node info */
+.node-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 11px 13px;
+}
+.node-icon-wrap {
+  width: 32px; height: 32px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+.node-meta { flex: 1; }
+.node-name { font-size: 12px; font-weight: 600; color: #334155; }
+.node-sub { font-size: 11px; color: #94a3b8; }
+.node-status {
+  font-size: 10px;
+  font-weight: 600;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+/* Unreviewed banner */
+.unreviewed {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  background: #fef3c7;
+  border-radius: 12px;
+  padding: 11px 13px;
+}
+.unreviewed-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.unreviewed-text { font-size: 12px; color: #92400e; line-height: 1.5; }
+
+.extraction-note {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  background: #fff7ed;
+  border-radius: 12px;
+  padding: 11px 13px;
+}
+.extraction-note-text { font-size: 12px; color: #c2410c; line-height: 1.5; }
+
+/* Spacer at bottom of detail scroll */
+.scroll-spacer { height: 12px; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- ══ LIST VIEW ══ -->
+  <div id="listView">
+
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">
+        <div class="signal">
+          <span style="height:4px"></span>
+          <span style="height:6px"></span>
+          <span style="height:8px"></span>
+          <span style="height:10px"></span>
+        </div>
+        <span style="font-size:11px">LTE</span>
+        <div class="battery"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="app-header">
+      <div class="header-row">
+        <div class="journal-logo">
+          <div class="bolt">⚡</div>
+          <span class="wordmark">Journal</span>
+        </div>
+        <div class="jurisdiction-pill">
+          <span class="flag">🇺🇬</span>
+          Uganda
+          <span class="caret">▾</span>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab"         onclick="setTab(this,'all')">All</div>
+        <div class="tab active"  onclick="setTab(this,'legislature')">Parliament</div>
+        <div class="tab"         onclick="setTab(this,'budget')">Budget</div>
+        <div class="tab"         onclick="setTab(this,'executive')">Executive</div>
+        <div class="tab"         onclick="setTab(this,'judiciary')">Courts</div>
+      </div>
+    </div>
+
+    <div class="feed" id="feed"></div>
+
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <div class="nav-icon">🗳️</div>
+        <div class="nav-label">Tabulate</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Surveys</div>
+      </div>
+      <div class="nav-item active">
+        <div class="nav-icon">⚡</div>
+        <div class="nav-label">Journal</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">🎓</div>
+        <div class="nav-label">Learn</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DETAIL VIEW ══ -->
+  <div id="detailView"></div>
+
+</div><!-- /phone -->
+
+<script>
+const packets = [
+  {
+    journal_id: "UG-legislature-20260506-001",
+    workstream: "legislature",
+    source_date: "2026-05-06",
+    title: "Protection of Sovereignty Bill, 2026 — Passed with Amendments",
+    summary: "Uganda's Parliament passed the Protection of Sovereignty Bill, 2026 on May 6, 2026, following approximately eight hours of debate. The bill, as amended, requires non-citizens, foreign governments, and organisations incorporated outside Uganda to register and declare foreign funds exceeding approximately 400 million shillings when engaged in specified political activities. The maximum penalty for non-compliance was reduced from 20 years to 10 years imprisonment during the amendment process. The bill was enacted 20 days after its introduction on April 15, 2026, and proceeds to presidential assent.",
+    key_points: [
+      { text: "The amended bill applies to non-citizens, foreign governments, and organisations incorporated outside Uganda. A clause classifying Ugandan citizens residing abroad as foreigners was removed during revision on April 30, 2026.", source_ref: "Definition amendment — allAfrica.com, May 7, 2026" },
+      { text: "Agents of a foreigner engaged in regulated political activities must declare foreign funds exceeding approximately 400 million shillings. The original bill required ministerial approval; the amended bill requires declaration only.", source_ref: "Clause 22 — allAfrica.com, May 7, 2026" },
+      { text: "Regulated political activities under Clause 2 include attempts to influence legislation, funding or campaigning for political parties, and activities intended to influence governance.", source_ref: "Clause 2 — allAfrica.com, May 7, 2026" },
+      { text: "Maximum imprisonment reduced from 20 years to 10 years.", source_ref: "Penalties section — allAfrica.com, May 7, 2026" },
+      { text: "Clause 18 explicitly permits court challenges to ministerial decisions, including High Court appeals. Warrantless inspection powers and mandatory health examination provisions were removed.", source_ref: "Clause 18 — allAfrica.com, May 7, 2026" },
+      { text: "The Bank of Uganda submitted that the original bill could weaken the shilling, drain foreign reserves, and undermine central bank independence.", source_ref: "Parliament of Uganda news, April 28, 2026" },
+      { text: "The Leader of the Opposition characterised the bill as 'unnecessary, legally redundant and potentially harmful' during plenary debate on April 27, 2026.", source_ref: "Parliament of Uganda news, April 27, 2026" }
+    ],
+    citations: [
+      { source_ref: "Parliament of Uganda — Parliament passes Sovereignty Bill, May 6 2026", url: "https://www.parliament.go.ug/news", excerpt: "Parliament passed the Protection of Sovereignty Bill, 2026, following substantial revisions that narrowed its scope and removed contentious provisions." },
+      { source_ref: "allAfrica — What Parliament Changed in Sovereignty Bill, May 7 2026", url: "https://allafrica.com/stories/202605070389.html", excerpt: "The clause classifying a Ugandan citizen residing outside Uganda as a foreigner was removed. Maximum imprisonment cut from 20 years to 10 years." },
+      { source_ref: "The Independent — Sovereignty Bill set for 2nd and final reading", url: "https://www.independent.co.ug/sovereignty-bill-2026-set-for-2nd-and-final-reading-in-parliament-today/", excerpt: "The passage capped an unusually rapid legislative process, with the Bill enacted in just 20 days." }
+    ],
+    human_reviewed: false,
+    has_poll: true,
+    poll_question: "Do you support the Protection of Sovereignty Bill as passed by Parliament?",
+    poll_publisher: "Published by Uganda Human Rights Commission · Open · Witnessed eligible",
+    node_id: "journal-node-nairobi-01",
+    node_label: "East Africa Civil Society Node",
+    source_url: "https://www.parliament.go.ug/news"
+  },
+  {
+    journal_id: "UG-budget-20260505-001",
+    workstream: "budget",
+    source_date: "2026-05-05",
+    title: "Supplementary Expenditure Schedule No.5 — Shs1.1 Trillion Approved",
+    summary: "Uganda's Parliament approved Supplementary Expenditure Schedule No.5 totalling Shs1.1 trillion for the 2025/26 financial year during the May 5, 2026 plenary session. Parliament suspended Rule 160 — which requires Budget Committee review before plenary approval — on a motion by MP Fox Odoi-Oywelowo. Funds cover presidential inauguration costs, AFCON 2027 preparations, local council elections, and wage shortfalls across government sectors.",
+    key_points: [
+      { text: "Total supplementary allocation: Shs1.1 trillion for financial year 2025/26.", source_ref: "Supplementary Expenditure Schedule No.5 — Parliament of Uganda, May 5, 2026" },
+      { text: "Allocations: Shs56 billion for local council elections; Shs46 billion for wage shortfalls; Shs29 billion for AFCON 2027 preparations; Shs3 billion for presidential inauguration.", source_ref: "Allocation breakdown — ugandaonline.net, May 5–6, 2026" },
+      { text: "Rule 160, requiring Budget Committee review before plenary approval, was suspended to allow direct passage.", source_ref: "Procedural motion — ugandaonline.net, May 6, 2026" },
+      { text: "Shadow Minister for Finance Ibrahim Ssemujju stated the items are foreseen expenditures and disagreed with their classification as emergencies.", source_ref: "Parliamentary debate — Daily Monitor, May 2026" }
+    ],
+    citations: [
+      { source_ref: "Parliament of Uganda — Parliament approves Shs1.1 trillion supplementary expenditure, May 5 2026", url: "https://www.parliament.go.ug/news", excerpt: "Funds allocated for presidential swearing-in, AFCON 2027 preparations, and local council elections." },
+      { source_ref: "Daily Monitor — Inside the Shs1.1 trillion supplementary budget", url: "https://www.monitor.co.ug/uganda/news/national/inside-the-shs1-1-trillion-supplementary-budget-5448890", excerpt: "Shadow Minister for Finance Ibrahim Ssemujju disagreed with the classification of the items as emergencies." }
+    ],
+    human_reviewed: false,
+    has_poll: false,
+    node_id: "journal-node-nairobi-01",
+    node_label: "East Africa Civil Society Node",
+    source_url: "https://www.parliament.go.ug/news"
+  },
+  {
+    journal_id: "UG-budget-20260427-001",
+    workstream: "budget",
+    source_date: "2026-04-27",
+    title: "National Budget 2026/27 — Shs84.3 Trillion Approved",
+    summary: "Uganda's Parliament passed the Shs84.3 trillion national budget for the 2026/27 financial year on April 27, 2026, through adoption of the Appropriation Bill. Domestic revenue of Shs44.18 trillion accounts for the largest share of financing. Of total expenditure, Shs47.16 trillion is discretionary spending and Shs37.23 trillion is statutory expenditure covering debt servicing, wages, pensions, and other legally mandated obligations.",
+    key_points: [
+      { text: "Total budget: Shs84.3 trillion for financial year 2026/27.", source_ref: "Appropriation Bill — Parliament of Uganda, April 27, 2026" },
+      { text: "Financing: domestic revenue Shs44.18T; domestic borrowing Shs11.97T; external project support Shs11.27T; domestic refinancing Shs13.97T; petroleum revenues Shs1.44T; budget support grants Shs1.22T.", source_ref: "Budget Committee report — ugandaonline.net, April 27, 2026" },
+      { text: "Infrastructure development allocated Shs10.8 trillion for roads, railways, water, electricity, and transport.", source_ref: "Expenditure allocations — ugandaonline.net, April 27, 2026" },
+      { text: "Agro-industrialisation allocated Shs2.2 trillion for agricultural research, inputs, irrigation, and agro-processing.", source_ref: "Expenditure allocations — ugandaonline.net, April 27, 2026" },
+      { text: "MP Ssemujju Nganda raised objections to last-minute changes, stating government had introduced budget adjustments inconsistent with the Public Finance Management Act.", source_ref: "Parliamentary debate — ugandaonline.net, April 27, 2026" }
+    ],
+    citations: [
+      { source_ref: "Parliament of Uganda — Parliament passes Shs84.3 trillion 2026/27 Budget, April 27 2026", url: "https://www.parliament.go.ug/news", excerpt: "National budget approved following Appropriation Bill adoption." },
+      { source_ref: "Uganda Online — Uganda Parliament Approves Shs84.3 Trillion Budget, April 27 2026", url: "https://www.ugandaonline.net/news/2026-04-27--uganda-parliament-approves-shs84-3-trillion-budget-for-2026-27-amid-debt-pressures--a8b3b1e26dc8/", excerpt: "Domestic revenue of Shs44.18 trillion (representing more than half of the total budget)." }
+    ],
+    human_reviewed: false,
+    has_poll: false,
+    node_id: "journal-node-nairobi-01",
+    node_label: "East Africa Civil Society Node",
+    source_url: "https://www.parliament.go.ug/news"
+  },
+  {
+    journal_id: "UG-executive-20260424-001",
+    workstream: "executive",
+    source_date: "2026-04-24",
+    title: "Trade Order Enforcement Suspended Nationwide",
+    summary: "Minister of State for Trade, Cooperatives and Industry Hon. David Bahati announced suspension of trade order enforcement across Uganda during the plenary sitting of April 24, 2026, following parliamentary concerns about the order. No timeframe for lifting the suspension was stated in available sources.",
+    key_points: [
+      { text: "Minister of State for Trade David Bahati announced suspension of trade order enforcement during the April 24, 2026 plenary sitting.", source_ref: "Parliament of Uganda news, April 24, 2026" },
+      { text: "Suspension applies nationwide. Duration not specified in available sources.", source_ref: "Parliament of Uganda news, April 24, 2026" }
+    ],
+    citations: [
+      { source_ref: "Parliament of Uganda — Govt suspends trade order enforcement, April 24 2026", url: "https://www.parliament.go.ug/news", excerpt: "Government pauses enforcement following parliamentary concerns." }
+    ],
+    human_reviewed: false,
+    has_poll: false,
+    extraction_notes: "Source detail limited to parliament.go.ug news headline. Specific trade order not identified. Flagged for human review before production publishing.",
+    node_id: "journal-node-nairobi-01",
+    node_label: "East Africa Civil Society Node",
+    source_url: "https://www.parliament.go.ug/news"
+  },
+  {
+    journal_id: "UG-legislature-20260423-001",
+    workstream: "legislature",
+    source_date: "2026-04-23",
+    title: "National Teachers Bill, 2024 — Passed, Awaiting Presidential Assent",
+    summary: "Uganda's Parliament passed the National Teachers Bill, 2024 on April 23, 2026, converting the Cabinet's 2019 National Teachers' Policy into enforceable law. The bill establishes a National Teachers Council, introduces mandatory registration and licensing for all practising teachers, and requires teacher internship programmes and continuous professional development. The bill awaits presidential assent.",
+    key_points: [
+      { text: "All teachers will be required to register with the National Teachers Council and hold a valid teaching licence before practising.", source_ref: "Bill provisions — allAfrica.com, April 24, 2026" },
+      { text: "The National Teachers Council handles registration, licensing, ethical standards, and disciplinary procedures.", source_ref: "Bill provisions — allAfrica.com, April 24, 2026" },
+      { text: "The bill introduces teacher internship programmes and mandatory continuous professional development requirements.", source_ref: "Bill provisions — allAfrica.com, April 24, 2026" }
+    ],
+    citations: [
+      { source_ref: "allAfrica — Uganda: Parliament Passes National Teachers Bill, April 24 2026", url: "https://allafrica.com/stories/202604240143.html", excerpt: "The National Teachers Bill introduces mandatory registration and licensing, teacher internship programmes and continuous Professional Development (CPD)." },
+      { source_ref: "Uganda Online — Uganda Parliament Approves National Teachers Bill, April 23 2026", url: "https://www.ugandaonline.net/news/2026-04-23--uganda-parliament-approves-national-teachers-bill-to-boost-teaching-standards--f0d0d6177d28/", excerpt: "The law now awaits presidential assent before it can be fully implemented." }
+    ],
+    human_reviewed: false,
+    has_poll: false,
+    node_id: "journal-node-nairobi-01",
+    node_label: "East Africa Civil Society Node",
+    source_url: "https://www.parliament.go.ug/news"
+  },
+  {
+    journal_id: "UG-legislature-20260423-002",
+    workstream: "legislature",
+    source_date: "2026-04-23",
+    title: "Income Tax (Amendment) Bill, 2026 — Diaspora Earnings Provision Rejected",
+    summary: "Uganda's Parliament passed the Income Tax (Amendment) Bill, 2026 on April 23, 2026, with a government proposal to tax income earned abroad and remitted to Uganda by Ugandan citizens removed during deliberation. The bill as passed does not include taxation of remittances sent home by Ugandans working abroad.",
+    key_points: [
+      { text: "Parliament rejected the government's proposal to tax income earned and sent home by Ugandans living and working abroad.", source_ref: "Parliament of Uganda — Parliament rejects taxing kyeyo earnings, April 23, 2026" },
+      { text: "The Income Tax (Amendment) Bill, 2026 was passed with the diaspora earnings tax clause removed.", source_ref: "Parliament of Uganda news, April 23, 2026" }
+    ],
+    citations: [
+      { source_ref: "Parliament of Uganda — Parliament rejects taxing kyeyo earnings, April 23 2026", url: "https://www.parliament.go.ug/news", excerpt: "Legislature opposes government proposal taxing diaspora income." }
+    ],
+    human_reviewed: false,
+    has_poll: false,
+    extraction_notes: "Limited source detail available. Full bill text and other provisions not retrieved. Human review recommended before production publishing.",
+    node_id: "journal-node-nairobi-01",
+    node_label: "East Africa Civil Society Node",
+    source_url: "https://www.parliament.go.ug/news"
+  }
+];
+
+const wsBadge = {
+  legislature: ['ws-legislature', 'Parliament'],
+  budget:      ['ws-budget',      'Budget'],
+  executive:   ['ws-executive',   'Executive'],
+  judiciary:   ['ws-judiciary',   'Judiciary'],
+  electoral:   ['ws-electoral',   'Electoral']
+};
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function renderCard(p) {
+  const [cls, label] = wsBadge[p.workstream] || ['ws-legislature','Parliament'];
+  const note = p.extraction_notes
+    ? `<span class="warn-chip">⚠ Limited sources</span>`
+    : (p.has_poll ? `<span class="survey-chip">📊 Poll attached</span>` : '');
+  return `
+    <div class="card" onclick="openDetail('${p.journal_id}')">
+      <div class="card-top">
+        <span class="ws-badge ${cls}">${label}</span>
+        <span class="card-date">${formatDate(p.source_date)}</span>
+      </div>
+      <div class="card-title">${p.title}</div>
+      <div class="card-summary">${p.summary}</div>
+      <div class="card-footer">
+        <div class="source-line">
+          <div class="src-dot"></div>
+          parliament.go.ug
+        </div>
+        ${note}
+      </div>
+    </div>`;
+}
+
+let currentFilter = 'legislature';
+
+function renderFeed(filter) {
+  currentFilter = filter;
+  const list = filter === 'all' ? packets : packets.filter(p => p.workstream === filter);
+  document.getElementById('feed').innerHTML = list.length
+    ? list.map(renderCard).join('')
+    : `<div style="text-align:center;padding:40px 20px;color:#94a3b8;font-size:13px;">No proceedings in this workstream for the selected period.</div>`;
+}
+
+function setTab(el, filter) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderFeed(filter);
+}
+
+function openDetail(id) {
+  const p = packets.find(x => x.journal_id === id);
+  if (!p) return;
+  const [cls, label] = wsBadge[p.workstream] || ['ws-legislature','Parliament'];
+
+  const keyPointsHtml = p.key_points.map(kp => `
+    <div class="key-point">
+      <div class="kp-bullet"></div>
+      <div class="kp-body">
+        <div class="kp-text">${kp.text}</div>
+        <div class="kp-ref">${kp.source_ref}</div>
+      </div>
+    </div>`).join('');
+
+  const citationsHtml = p.citations.map(c => {
+    const isUnverified = c.excerpt && c.excerpt.includes('unverified');
+    return `
+    <div class="citation">
+      <div class="cite-source">
+        <span>${c.source_ref}</span>
+        <span class="cite-link-icon">↗</span>
+      </div>
+      <div class="cite-excerpt ${isUnverified ? 'cite-unverified' : ''}">"${c.excerpt}"</div>
+    </div>`;
+  }).join('');
+
+  const pollHtml = p.has_poll ? `
+    <div class="survey-cta">
+      <div class="survey-cta-eyebrow">📊 Poll on this bill</div>
+      <div class="survey-cta-q">${p.poll_question}</div>
+      <div class="survey-cta-pub">${p.poll_publisher}</div>
+      <div class="survey-cta-btn">Share your view →</div>
+    </div>` : '';
+
+  const unreviewedHtml = !p.human_reviewed ? `
+    <div class="unreviewed">
+      <div class="unreviewed-icon">🤖</div>
+      <div class="unreviewed-text">AI-extracted · not yet human reviewed. Citations link directly to primary sources — verify before relying on specific figures.</div>
+    </div>` : '';
+
+  const extractionNoteHtml = p.extraction_notes ? `
+    <div class="extraction-note">
+      <div class="unreviewed-icon">⚠️</div>
+      <div class="extraction-note-text">${p.extraction_notes}</div>
+    </div>` : '';
+
+  document.getElementById('detailView').innerHTML = `
+    <div class="detail-header">
+      <div class="back-btn" onclick="closeDetail()">
+        <span class="back-arrow">‹</span> Journal
+      </div>
+      <div class="detail-meta-row">
+        <span class="ws-badge ${cls}">${label}</span>
+        <span class="detail-date">${formatDate(p.source_date)}</span>
+      </div>
+    </div>
+
+    <div class="detail-scroll">
+      <div class="detail-title">${p.title}</div>
+
+      ${unreviewedHtml}
+      ${extractionNoteHtml}
+
+      <div class="section">
+        <div class="section-label">Summary</div>
+        <div class="summary-text">${p.summary}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Key Points</div>
+        ${keyPointsHtml}
+      </div>
+
+      ${pollHtml}
+
+      <div class="section">
+        <div class="section-label">Primary Sources</div>
+        ${citationsHtml}
+      </div>
+
+      <div class="section" style="padding:12px 15px;">
+        <div class="section-label" style="margin-bottom:8px;">Journal Node</div>
+        <div class="node-row">
+          <div class="node-icon-wrap">📡</div>
+          <div class="node-meta">
+            <div class="node-name">${p.node_label}</div>
+            <div class="node-sub">${p.node_id}</div>
+          </div>
+          <div class="node-status">Active</div>
+        </div>
+      </div>
+
+      <div class="scroll-spacer"></div>
+    </div>`;
+
+  document.getElementById('detailView').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailView').classList.remove('open');
+  document.getElementById('detailView').innerHTML = '';
+}
+
+// Init with Parliament filter active
+renderFeed('legislature');
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+name: Android dev client
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/package.json'
+      - 'apps/mobile/app.json'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag, or SHA to build
+        required: false
+        default: main
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Compute base image tag
+        id: base
+        run: |
+          NATIVE_DEPS=(
+            expo react-native
+            expo-build-properties expo-camera expo-dev-client
+            expo-intent-launcher expo-sqlite
+            react-native-ble-plx react-native-get-random-values
+            react-native-nitro-modules react-native-quick-base64
+            react-native-quick-crypto react-native-safe-area-context
+            react-native-screens react-native-tcp-socket
+          )
+          INPUT=""
+          PKG=apps/mobile/package.json
+          for dep in "${NATIVE_DEPS[@]}"; do
+            ver=$(node -p "require('./${PKG}').dependencies['${dep}'] || ''" 2>/dev/null)
+            INPUT="${INPUT}${dep}@${ver}"$'\n'
+          done
+          INPUT="${INPUT}app.json:$(md5sum apps/mobile/app.json | cut -d' ' -f1)"$'\n'
+          TAG=$(printf '%s' "${INPUT}" | md5sum | cut -c1-12)
+          REGISTRY="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          echo "tag=${TAG}"                                        >> "$GITHUB_OUTPUT"
+          echo "image=${REGISTRY}/peerpulse-android-base:${TAG}"  >> "$GITHUB_OUTPUT"
+          echo "latest=${REGISTRY}/peerpulse-android-base:latest" >> "$GITHUB_OUTPUT"
+          echo "Base image tag: ${TAG}"
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull base image
+        id: pull
+        continue-on-error: true
+        run: |
+          docker pull "${{ steps.base.outputs.image }}"
+          echo "hit=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push base image
+        if: steps.pull.outputs.hit != 'true'
+        run: |
+          echo "Base image not in registry — building (first run or deps changed)"
+          docker build \
+            --platform linux/amd64 \
+            -f docker/android-build/Dockerfile.base \
+            -t "${{ steps.base.outputs.image }}" \
+            -t "${{ steps.base.outputs.latest }}" \
+            .
+          docker push "${{ steps.base.outputs.image }}"
+          docker push "${{ steps.base.outputs.latest }}"
+
+      - name: Build debug APK
+        run: |
+          mkdir -p build/apk
+          docker run --rm \
+            -e CI=true \
+            -v "${GITHUB_WORKSPACE}/packages/core/src:/workspace/packages/core/src:ro" \
+            -v "${GITHUB_WORKSPACE}/apps/mobile/src:/workspace/apps/mobile/src:ro" \
+            -v "${GITHUB_WORKSPACE}/apps/mobile/App.js:/workspace/apps/mobile/App.js:ro" \
+            -v "${GITHUB_WORKSPACE}/build/apk:/out" \
+            "${{ steps.base.outputs.image }}" \
+            bash -c "
+              cd apps/mobile/android && \
+              ./gradlew assembleDebug --no-daemon && \
+              cp app/build/outputs/apk/debug/app-debug.apk /out/peerpulse-dev.apk
+            "
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: peerpulse-dev-${{ github.sha }}
+          path: build/apk/peerpulse-dev.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      # Republish the APK as a rolling pre-release so collaborators get a
+      # stable download URL that doesn't require GitHub login:
+      #   https://github.com/<owner>/<repo>/releases/download/dev-latest/peerpulse-dev.apk
+      - name: Publish dev-latest release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: dev-latest
+          name: Dev client (latest)
+          body: |
+            Rolling debug APK from `main`. Overwritten on every push that
+            changes native deps (`apps/mobile/package.json`, `apps/mobile/app.json`).
+
+            **Commit:** ${{ github.sha }}
+
+            ## Install
+
+            1. Download `peerpulse-dev.apk` below
+            2. On Android, enable "Install unknown apps" for your browser/file manager
+            3. Open the APK to install
+            4. Launch PeerPulse, scan the QR from a running `pnpm --filter @peerpulse/mobile dev`
+
+            This is a development build, unsigned for release distribution. Do not use for elections.
+          prerelease: true
+          make_latest: false
+          files: build/apk/peerpulse-dev.apk

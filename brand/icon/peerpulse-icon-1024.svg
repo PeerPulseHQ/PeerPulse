@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PeerPulse app icon — master (1024×1024)
+  Composed icon: dark-navy rounded square (radius 224 = 22% of width)
+  with the canonical mark centered at 80% of the canvas (820×820).
+  Padding 102 per side (10% of canvas). Source for all bitmap
+  exports (mdpi → xxxhdpi → Play Store).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" aria-label="PeerPulse">
+  <title>PeerPulse</title>
+  <rect width="1024" height="1024" rx="224" fill="#050810"/>
+  <svg x="102" y="102" width="820" height="820" viewBox="0 0 64 64" fill="none" stroke="#f3ead7">
+    <circle cx="32" cy="32" r="27" stroke-width="4" opacity="0.4"/>
+    <circle cx="32" cy="32" r="20" stroke-width="5" opacity="0.7"/>
+    <circle cx="32" cy="32" r="9"  stroke-width="8"/>
+    <path d="M 19 32 L 26 32 L 26 58.5 A 3.5 3.5 0 0 1 19 58.5 Z" fill="#f3ead7" stroke="none"/>
+  </svg>
+</svg>

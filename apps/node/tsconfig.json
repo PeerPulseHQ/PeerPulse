@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "declaration": false,
+    "declarationMap": false,
+    "paths": {
+      "@peerpulse/core":    ["../../packages/core/src/index.ts"],
+      "@peerpulse/core/*":  ["../../packages/core/src/*.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
+}

@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PeerPulse — brand showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #050810;
+    --surface:   #0a1326;
+    --card:      #0c1222;
+    --border:    #14213a;
+    --border-hi: #1e3357;
+    --text:      #dce8f8;
+    --text-2:    #7a95b8;
+    --text-3:    #475c7a;
+    --cream:     #f3ead7;
+    --ink:       #0c1222;
+    --amber:     #eab308;
+    --green:     #22c55e;
+  }
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    line-height: 1.6;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .kicker {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 14px;
+  }
+  h2 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .lead {
+    font-size: 15px;
+    color: var(--text-2);
+    max-width: 560px;
+    margin-bottom: 32px;
+  }
+  section { padding: 80px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+
+  /* === MARK RENDERING ===
+     - .m-img        : <img> of the canonical mark, cream default
+     - .m-mask, .m-* : recoloured mark via CSS mask + bg-color */
+  img.m-img { display: block; }
+  .m-mask {
+    display: inline-block;
+    -webkit-mask: url("logo/peerpulse-mark.svg") no-repeat center / contain;
+            mask: url("logo/peerpulse-mark.svg") no-repeat center / contain;
+  }
+  .m-ink   { background-color: var(--ink); }
+  .m-cream { background-color: var(--cream); }
+  .m-amber { background-color: var(--amber); }
+
+  /* === HERO === */
+  .hero {
+    padding: 120px 0 100px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 50% 30%, rgba(243,234,215,0.04), transparent 60%),
+      var(--bg);
+  }
+  .hero img.m-img { width: 220px; height: 220px; margin: 0 auto 44px; }
+  .hero h1 {
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--cream);
+    margin-bottom: 12px;
+  }
+  .hero .tagline {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .hero .tagline span { color: var(--cream); }
+  .hero-meta {
+    margin-top: 64px;
+    display: inline-flex;
+    gap: 32px;
+    padding: 12px 24px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .hero-meta b { color: var(--text); font-weight: 500; }
+
+  /* === SIZES === */
+  .sizes-grid {
+    display: flex;
+    gap: 32px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  .size-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .size-cell .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.08em;
+  }
+
+  /* === SURFACES === */
+  .surfaces-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .surface {
+    border-radius: 14px;
+    padding: 48px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    border: 1px solid transparent;
+  }
+  .surface img.m-img,
+  .surface .m-mask { width: 96px; height: 96px; }
+  .surface .swatch-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+  }
+  .surface-navy   { background: #050810; border-color: var(--border); color: var(--cream); }
+  .surface-cream  { background: #faf6ec; border-color: #d8cfb5;       color: var(--ink); }
+  .surface-ink    { background: #1a1a1a; border-color: #333;          color: var(--cream); }
+  .surface-amber  { background: #1a1206; border-color: #4d3a10;       color: var(--amber); }
+
+  /* === APP ICON === */
+  .icons-grid {
+    display: flex;
+    align-items: flex-end;
+    gap: 36px;
+    flex-wrap: wrap;
+  }
+  .app-icon-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .app-icon-tile img {
+    display: block;
+    box-shadow:
+      0 8px 24px rgba(0,0,0,0.4),
+      0 2px 6px rgba(0,0,0,0.5);
+    border-radius: 22%;
+  }
+  .app-icon-tile .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.08em;
+  }
+
+  /* === PHONE === */
+  .phone-stage {
+    display: flex;
+    gap: 56px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .phone {
+    width: 280px;
+    height: 580px;
+    background: linear-gradient(180deg, #0a1326, #050810);
+    border: 8px solid #1a1a1a;
+    border-radius: 42px;
+    padding: 16px 14px;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.05),
+      0 24px 56px rgba(0,0,0,0.6);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 6px;
+    border-radius: 4px;
+    background: #1a1a1a;
+  }
+  .phone-status {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 18px 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-2);
+    letter-spacing: 0.04em;
+  }
+  .phone-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px 14px;
+    padding: 18px 12px;
+  }
+  .phone-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .phone-app .icon-bg {
+    width: 50px;
+    height: 50px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--text-2);
+    background: rgba(255,255,255,0.06);
+  }
+  .phone-app .app-name {
+    font-size: 9.5px;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.2;
+  }
+  .phone-app.peerpulse .icon-bg {
+    background: linear-gradient(160deg, #0a1326, #050810);
+    box-shadow: 0 0 0 0.5px rgba(255,255,255,0.1);
+    padding: 5px;
+  }
+  .phone-app.peerpulse .icon-bg img { width: 40px; height: 40px; display: block; }
+  .phone-app.peerpulse .app-name { color: var(--cream); font-weight: 500; }
+  .phone-caption { max-width: 380px; }
+  .phone-caption h3 {
+    font-size: 18px;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .phone-caption p {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.7;
+  }
+
+  /* === WEB NAV === */
+  .web-mockup {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .web-tabs {
+    background: #1a1a1f;
+    padding: 8px 14px 0;
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    border-bottom: 1px solid #2a2a30;
+  }
+  .web-tab {
+    background: #2a2a30;
+    color: var(--text-2);
+    padding: 7px 14px;
+    font-size: 11.5px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid transparent;
+    border-bottom: none;
+  }
+  .web-tab.active {
+    background: var(--bg);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .web-tab img.fav { width: 13px; height: 13px; display: inline-block; vertical-align: middle; }
+  .web-url {
+    background: var(--bg);
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .web-url b { color: var(--text); font-weight: 500; }
+  .web-nav {
+    height: 60px;
+    background: rgba(5,8,16,0.92);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+  }
+  .web-nav .logo { margin-right: auto; display: flex; align-items: center; }
+  .web-nav .logo img { height: 30px; width: auto; display: block; }
+  .web-nav .links { display: flex; gap: 6px; }
+  .web-nav .links a {
+    font-size: 13px;
+    color: var(--text-2);
+    padding: 6px 12px;
+    border-radius: 6px;
+  }
+  .web-nav .links a.active { color: var(--text); background: rgba(255,255,255,0.05); }
+  .web-nav .cta {
+    margin-left: 12px;
+    background: var(--amber);
+    color: #0a0700;
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .web-body {
+    padding: 60px 32px;
+    text-align: center;
+    color: var(--text);
+  }
+  .web-body h1 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .web-body h1 em { font-style: normal; color: var(--amber); }
+  .web-body p {
+    font-size: 14px;
+    color: var(--text-2);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* === SPLASH === */
+  .splash {
+    height: 600px;
+    border-radius: 16px;
+    background:
+      radial-gradient(ellipse at center, rgba(243,234,215,0.06), transparent 60%),
+      linear-gradient(180deg, #0a1326 0%, #050810 100%);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    text-align: center;
+    color: var(--cream);
+    position: relative;
+    overflow: hidden;
+  }
+  .splash::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(rgba(243,234,215,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.5;
+  }
+  .splash > * { position: relative; z-index: 1; }
+  .splash img.stacked { width: 240px; height: auto; display: block; }
+  .splash .splash-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(243,234,215,0.55);
+  }
+
+  /* === DOCUMENT === */
+  .doc {
+    background: #faf6ec;
+    border: 1px solid #d8cfb5;
+    border-radius: 4px;
+    padding: 60px 70px;
+    color: var(--ink);
+    max-width: 640px;
+    margin: 0 auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .doc-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #d8cfb5;
+    margin-bottom: 36px;
+  }
+  .doc-header .m-mask { width: 58px; height: 58px; flex-shrink: 0; }
+  .doc-header .text { flex: 1; }
+  .doc-header .text .name {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .doc-header .text .sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: #5a513f;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .doc-body {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: #2a2519;
+  }
+  .doc-body p { margin-bottom: 14px; }
+  .doc-body strong { color: var(--ink); }
+  .doc-stamp {
+    position: absolute;
+    bottom: 40px;
+    right: 56px;
+    width: 96px;
+    height: 96px;
+    opacity: 0.18;
+    transform: rotate(-6deg);
+  }
+
+  /* === FOOTER === */
+  footer {
+    padding: 60px 0 80px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    color: var(--text-3);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== HERO ============== -->
+<header class="hero">
+  <div class="container">
+    <img class="m-img" src="logo/peerpulse-mark.svg" alt="PeerPulse mark" />
+    <h1>PeerPulse</h1>
+    <div class="tagline">Decentralised <span>parallel</span> vote tabulation</div>
+    <div class="hero-meta">
+      <span><b>Mark</b> · pulsing P beacon</span>
+      <span><b>Color</b> · monochrome civic cream</span>
+      <span><b>Treatment</b> · trust through restraint</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============== SIZES ============== -->
+<section>
+  <div class="container">
+    <div class="kicker">01 · Scale</div>
+    <h2>The mark at every size</h2>
+    <p class="lead">From a 256-pixel hero render down to a 16-pixel browser favicon. The bowl, stem, and inner ring remain readable; the outer halos antialias gracefully at small sizes.</p>
+    <div class="sizes-grid">
+      <div class="size-cell"><img class="m-img" src="logo/peerpulse-mark.svg" width="256" height="256" alt=""><div class="label">256 PX</div></div>
+      <div class="size-cell"><img class="m-img" src="logo/peerpulse-mark.svg" width="128" height="128" alt=""><div class="label">128 PX</div></div>
+      <div class="size-cell"><img class="m-img" src="logo/peerpulse-mark.svg" width="64"  height="64"  alt=""><div class="label">64 PX</div></div>
+      <div class="size-cell"><img class="m-img" src="logo/peerpulse-mark.svg" width="32"  height="32"  alt=""><div class="label">32 PX</div></div>
+      <div class="size-cell"><img class="m-img" src="logo/peerpulse-mark.svg" width="16"  height="16"  alt=""><div class="label">16 PX</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SURFACES ============== -->
+<section>
+  <div class="container">
+    <div class="kicker">02 · Surfaces</div>
+    <h2>Adaptive across surfaces</h2>
+    <p class="lead">Monochrome by design. The mark inherits its color from the parent container — cream on dark, ink on light, amber for election-day urgency only.</p>
+    <div class="surfaces-grid">
+      <div class="surface surface-navy">
+        <img class="m-img" src="logo/peerpulse-mark.svg" alt="">
+        <div class="swatch-name">CREAM ON NAVY · default</div>
+      </div>
+      <div class="surface surface-cream">
+        <span class="m-mask m-ink" role="img" aria-label="Mark in ink"></span>
+        <div class="swatch-name">INK ON CREAM · inverse</div>
+      </div>
+      <div class="surface surface-ink">
+        <img class="m-img" src="logo/peerpulse-mark.svg" alt="">
+        <div class="swatch-name">CREAM ON BLACK · print</div>
+      </div>
+      <div class="surface surface-amber">
+        <span class="m-mask m-amber" role="img" aria-label="Mark in amber"></span>
+        <div class="swatch-name">AMBER · alert only</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== APP ICON ============== -->
+<section>
+  <div class="container">
+    <div class="kicker">03 · App icon</div>
+    <h2>Android launcher</h2>
+    <p class="lead">Each tile below is the actual <code>icon/peerpulse-icon-1024.svg</code> file scaled down. Mark centered at 80% of canvas with 102-unit padding on every side.</p>
+    <div class="icons-grid">
+      <div class="app-icon-tile"><img src="icon/peerpulse-icon-1024.svg" width="180" height="180" alt=""><div class="label">512 PX</div></div>
+      <div class="app-icon-tile"><img src="icon/peerpulse-icon-1024.svg" width="120" height="120" alt=""><div class="label">192 PX</div></div>
+      <div class="app-icon-tile"><img src="icon/peerpulse-icon-1024.svg" width="72"  height="72"  alt=""><div class="label">96 PX</div></div>
+      <div class="app-icon-tile"><img src="icon/peerpulse-icon-1024.svg" width="44"  height="44"  alt=""><div class="label">48 PX</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== PHONE MOCKUP ============== -->
+<section>
+  <div class="container">
+    <div class="kicker">04 · Phone home screen</div>
+    <h2>On a citizen's pocket</h2>
+    <div class="phone-stage">
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>● ● ●</span></div>
+        <div class="phone-grid">
+          <div class="phone-app peerpulse">
+            <div class="icon-bg"><img src="logo/peerpulse-mark.svg" alt=""></div>
+            <div class="app-name">PeerPulse</div>
+          </div>
+          <div class="phone-app"><div class="icon-bg">M</div><div class="app-name">Maps</div></div>
+          <div class="phone-app"><div class="icon-bg">📷</div><div class="app-name">Camera</div></div>
+          <div class="phone-app"><div class="icon-bg">SX</div><div class="app-name">SimpleX</div></div>
+          <div class="phone-app"><div class="icon-bg">S</div><div class="app-name">Signal</div></div>
+          <div class="phone-app"><div class="icon-bg">B</div><div class="app-name">Briar</div></div>
+          <div class="phone-app"><div class="icon-bg">T</div><div class="app-name">Tor</div></div>
+          <div class="phone-app"><div class="icon-bg">⏷</div><div class="app-name">F-Droid</div></div>
+          <div class="phone-app"><div class="icon-bg">○</div><div class="app-name">Phone</div></div>
+          <div class="phone-app"><div class="icon-bg">✉</div><div class="app-name">Mail</div></div>
+          <div class="phone-app"><div class="icon-bg">🕘</div><div class="app-name">Clock</div></div>
+          <div class="phone-app"><div class="icon-bg">⚙</div><div class="app-name">Settings</div></div>
+        </div>
+      </div>
+      <div class="phone-caption">
+        <h3>Distributed via F-Droid &amp; direct APK</h3>
+        <p>The launcher icon must read clearly against any wallpaper a user picks. The mark's dark-navy ground gives it a stable presence next to messengers and tools — recognisable but not screaming for attention.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== WEB NAV MOCKUP ============== -->
+<section>
+  <div class="container">
+    <div class="kicker">05 · Website</div>
+    <h2>peerpulse.app</h2>
+    <p class="lead">Replacing the existing peer-graph mark in the site navigation. The nav logo is the horizontal lockup SVG; the browser favicon is the canonical mark.</p>
+    <div class="web-mockup">
+      <div class="web-tabs">
+        <div class="web-tab active">
+          <img class="fav" src="favicon/peerpulse-favicon.svg" alt="">
+          PeerPulse — Decentralised Election Verification
+        </div>
+        <div class="web-tab">Whitepaper</div>
+        <div class="web-tab">Press</div>
+      </div>
+      <div class="web-url">https://<b>peerpulse.app</b></div>
+      <div class="web-nav">
+        <div class="logo"><img src="logo/peerpulse-lockup.svg" alt="PeerPulse"></div>
+        <div class="links">
+          <a class="active">Tabulate</a>
+          <a>Surveys</a>
+          <a>Journal</a>
+          <a>Learn</a>
+          <a>Docs</a>
+        </div>
+        <div class="cta">Download APK</div>
+      </div>
+      <div class="web-body">
+        <h1>Citizens count, <em>together</em>.</h1>
+        <p>An Android-only parallel vote tabulation network. No central server. No party. No permission required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SPLASH ============== -->
+<section>
+  <div class="container">
+    <div class="kicker">06 · App splash</div>
+    <h2>Launch screen</h2>
+    <div class="splash">
+      <img class="stacked" src="logo/peerpulse-lockup-stacked.svg" alt="PeerPulse">
+      <div class="splash-tag">Decentralised &nbsp;·&nbsp; Pseudonymous &nbsp;·&nbsp; Android</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== DOCUMENT ============== -->
+<section>
+  <div class="container">
+    <div class="kicker">07 · Document / press release</div>
+    <h2>Press &amp; civil society materials</h2>
+    <p class="lead">For PDFs, press releases, partner letters, and printed handouts. The mark anchors a letterhead in ink-on-cream; a watermark version of the same mark seals the bottom-right corner like a notary's stamp.</p>
+    <div class="doc">
+      <div class="doc-header">
+        <span class="m-mask m-ink" role="img" aria-label="PeerPulse"></span>
+        <div class="text">
+          <div class="name">PeerPulse Contributors</div>
+          <div class="sub">Press release · 10 August 2027</div>
+        </div>
+      </div>
+      <div class="doc-body">
+        <p><strong>Nairobi.</strong> On election day, PeerPulse processed 47,212 signed polling-station tallies from 38,847 unique citizen devices across 290 constituencies — a parallel count of the Kenyan general election, signed by the citizens who witnessed it.</p>
+        <p>The network ran without a central server, without state cooperation, and without any single entity able to alter, suppress, or fake a result.</p>
+        <p>The aggregate variance between the citizen-signed parallel count and the official IEBC result is published in real time at peerpulse.app/elections/ke-2027.</p>
+      </div>
+      <span class="m-mask m-ink doc-stamp" role="img" aria-label=""></span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">PeerPulse · brand showcase · v1</div>
+</footer>
+
+</body>
+</html>

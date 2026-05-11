@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "lib": ["ES2019"],
+    "jsx": "react-native",
+    "allowJs": true,
+    "noEmit": true,
+    "paths": {
+      "@peerpulse/core": ["../../packages/core/src/index.ts"],
+      "@peerpulse/core/*": ["../../packages/core/src/*.ts"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "android", "ios", "dist"]
+}

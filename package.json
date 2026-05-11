@@ -1,0 +1,24 @@
+{
+  "name": "peerpulse",
+  "private": true,
+  "license": "MIT",
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "postinstall":      "node scripts/postinstall.mjs",
+    "setup:contributor":"node scripts/setup-contributor.mjs",
+    "dev":              "turbo dev",
+    "build":            "turbo build",
+    "typecheck":        "turbo typecheck",
+    "test":             "turbo test",
+    "mobile:android":   "pnpm --filter @peerpulse/mobile android",
+    "mobile:build:dev": "pnpm --filter @peerpulse/mobile build:dev",
+    "relay":            "pnpm --filter @peerpulse/node start"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["better-sqlite3"]
+  },
+  "devDependencies": {
+    "turbo":      "^2.0.0",
+    "typescript": "^5.5.0"
+  }
+}

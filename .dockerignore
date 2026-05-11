@@ -1,0 +1,18 @@
+# Never include build outputs or local install artifacts
+node_modules
+build/
+.git
+.github
+
+# Exclude large app source trees that aren't needed for the base image
+# (package.json files from these apps ARE still needed for pnpm workspace install)
+apps/web/app
+apps/web/.next
+apps/web/public
+apps/node/src
+apps/node/dist
+
+# Docs and private material
+docs
+private
+*.md

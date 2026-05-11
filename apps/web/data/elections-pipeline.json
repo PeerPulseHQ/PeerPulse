@@ -1,0 +1,112 @@
+[
+  {
+    "id": "ke-general-2027",
+    "flag": "🇰🇪",
+    "country": "Kenya",
+    "type": "General — Presidential + Parliamentary + County",
+    "date": "10 Aug 2027",
+    "status": "primary",
+    "lead": "15 months",
+    "notes": "Legal review complete. ELOG, ICJ Kenya, AFRICOG as seeding partners. Android >80%, WhatsApp dominant, high international press interest.",
+    "action": "Seeding begins Oct 2026"
+  },
+  {
+    "id": "ng-general-2027",
+    "flag": "🇳🇬",
+    "country": "Nigeria",
+    "type": "Presidential + National Assembly",
+    "date": "20 Feb 2027",
+    "status": "high",
+    "lead": "9 months",
+    "notes": "Largest African democracy. YIAGA Africa PVT programme is a direct analogue. 80M+ registered voters. Short lead — decide immediately.",
+    "action": "Go/no-go by Jul 2026"
+  },
+  {
+    "id": "ph-presidential-2028",
+    "flag": "🇵🇭",
+    "country": "Philippines",
+    "type": "Presidential + Congress",
+    "date": "8 May 2028",
+    "status": "high",
+    "lead": "24 months",
+    "notes": "High Android penetration. Strong civil society PVT tradition (PPCRV). English-language. Large diaspora following.",
+    "action": "Legal review 2027"
+  },
+  {
+    "id": "drc-presidential-2028",
+    "flag": "🇨🇩",
+    "country": "DRC",
+    "type": "Presidential + National Assembly",
+    "date": "16 Dec 2028",
+    "status": "high",
+    "lead": "31 months",
+    "notes": "CENCO one of Africa's most credible domestic observer orgs. Conditional on eastern conflict resolution. French-language app copy required.",
+    "action": "Scope late 2026"
+  },
+  {
+    "id": "zm-general-2026",
+    "flag": "🇿🇲",
+    "country": "Zambia",
+    "type": "General",
+    "date": "13 Aug 2026",
+    "status": "watch",
+    "lead": "3 months",
+    "notes": "Below 4-month seeding minimum. Pilot run candidate only — no full deployment. Strong civil society, peaceful tradition.",
+    "action": "Monitor only"
+  },
+  {
+    "id": "ug-general-2026",
+    "flag": "🇺🇬",
+    "country": "Uganda",
+    "type": "Presidential + Parliamentary",
+    "date": "Jan 2026",
+    "status": "cat",
+    "lead": "Done",
+    "notes": "Museveni won 7th term (71.6%). Result disputed. Internet shutdown. Not deployed — high-value retrospective case for press narrative.",
+    "action": "Retrospective"
+  },
+  {
+    "id": "et-parliament-2026",
+    "flag": "🇪🇹",
+    "country": "Ethiopia",
+    "type": "Parliamentary",
+    "date": "Jun 2026",
+    "status": "cat",
+    "lead": "—",
+    "notes": "Hostile civil society environment. Journalists and observers arrested. Internet shutdowns. Not a target market.",
+    "action": "—"
+  },
+  {
+    "id": "ng-state-2027",
+    "flag": "🇳🇬",
+    "country": "Nigeria",
+    "type": "State elections",
+    "date": "6 Mar 2027",
+    "status": "high",
+    "lead": "~10 months",
+    "notes": "Follows federal election. YIAGA Africa coverage. High complexity, variable security by state.",
+    "action": "Follows federal"
+  },
+  {
+    "id": "zw-general-2028",
+    "flag": "🇿🇼",
+    "country": "Zimbabwe",
+    "type": "General",
+    "date": "~Jul 2028",
+    "status": "watch",
+    "lead": "~26 months",
+    "notes": "ZANU-PF dominance. Legal risk for parallel tallying higher than Kenya. Needs jurisdiction-specific legal review.",
+    "action": "Legal review needed"
+  },
+  {
+    "id": "id-presidential-2029",
+    "flag": "🇮🇩",
+    "country": "Indonesia",
+    "type": "Presidential + DPR",
+    "date": "~Feb 2029",
+    "status": "high",
+    "lead": "~33 months",
+    "notes": "280M people. Android dominant. Strong civil society (KIPP, Perludem). High complexity.",
+    "action": "Scope 2027"
+  }
+]

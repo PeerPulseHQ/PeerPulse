@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -e
+
+# ── Neutralise timestamps ──────────────────────────────────────────────────────
+NOW_UTC="$(date -u +%Y-%m-%dT%H:%M:%S+0000)"
+export GIT_COMMITTER_DATE="$NOW_UTC"
+export GIT_AUTHOR_DATE="$NOW_UTC"
+
+# ── Secrets scan ──────────────────────────────────────────────────────────────
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+
+BLOCKED_PATTERNS=(
+  "-----BEGIN.*PRIVATE KEY-----"
+  "-----BEGIN RSA"
+  "-----BEGIN EC"
+  "-----BEGIN OPENSSH"
+  "AWS_SECRET_ACCESS_KEY\s*="
+  "PINATA_SECRET\s*=[^$]"
+  "sk_live_[a-zA-Z0-9]"
+  "xoxb-[a-zA-Z0-9]"
+  "ghp_[a-zA-Z0-9]"
+)
+
+for file in $STAGED; do
+  [[ "$file" == *.example ]] && continue
+  [[ "$file" == *.png || "$file" == *.jpg || "$file" == *.apk ]] && continue
+  [[ "$file" == .githooks/* ]] && continue
+
+  for pattern in "${BLOCKED_PATTERNS[@]}"; do
+    if git show ":$file" 2>/dev/null | grep -qiE -e "$pattern"; then
+      echo "❌ Possible secret in staged file: $file"
+      echo "   Pattern matched: $pattern"
+      echo "   Unstage with: git restore --staged $file"
+      exit 1
+    fi
+  done
+done
+
+echo "✓ Pre-commit: no secrets detected, timestamps neutralised to UTC"
