@@ -1,18 +1,16 @@
 # PeerPulse: Decentralised Civic Intelligence
 
-**A Peer-to-Peer Protocol for Election Verification, Civic Polling, and Government Transparency**
+**A Peer-to-Peer Protocol for Election Verification**
 
-*Version 7.0, May 2026*
-
-*Announced first deployment: Kenya General Election, 10 August 2027*
+*Protocol edition · Version 7.0, May 2026*
 
 ## Abstract
 
 The central problem in election integrity is establishing ground truth in an adversarial environment. Existing approaches depend on a central authority, a trusted server, an accredited observer body, or an official commission, that can be pressured, corrupted, or shut down. Each shares a single point of failure: a human institution that can be compelled.
 
-PeerPulse describes a different model. When a citizen photographs the official tally sheet posted at the public entrance of their polling station, their device produces three independent cryptographic proofs of physical presence: a hardware attestation showing the signing key was generated in a real Android Trusted Execution Environment, a witness bundle of mutual Bluetooth Low Energy attestations exchanged with other co-located observers, and GPS coordinates within a defined radius of the station. When many citizens independently produce such tallies for the same station and agree on a number, the agreement is significantly harder to fabricate than any server-issued certificate. No pre-coordination is required. No organisation needs to accredit them.
+PeerPulse describes a different model: when a citizen photographs the official tally sheet posted at their polling station's public entrance, the device produces three independent proofs of physical presence — hardware attestation, mutual BLE witness attestations, and GPS — that together are significantly harder to fabricate than any server-issued certificate, with no pre-coordination and no accrediting body required.
 
-This paper describes the PeerPulse protocol: a peer-to-peer system for election tally witnessing, targeted civic polling, AI-extracted neutral summaries of government proceedings, and civic education. We specify the packet schema, the seven-tier trust hierarchy, the BLE presence ceremony, the hardware attestation requirement, the photo-and-location evidence model, the witness-graph dispute resolution algorithm, and the threat model. We also describe three strategic properties the architecture creates, legitimacy inversion, shutdown boomerang, and ban resistance, and why each makes cooperation with PeerPulse the rational choice for any government that expects to win fairly.
+This paper specifies the PeerPulse Elections protocol: packet schema, seven-tier trust hierarchy, BLE presence ceremony, hardware attestation chain, photo-and-location evidence model, witness-graph dispute resolution algorithm, and threat model. PeerPulse's additional civic-polling, civic-summary, and civic-education surfaces are specified in companion documents and out of scope here.
 
 ## 1. Introduction
 
@@ -30,26 +28,13 @@ Democratic elections in contested environments face a consistent set of integrit
 
 ### 1.2 The Existing Landscape
 
-Parallel Vote Tabulation (PVT) is the established methodology for independent election monitoring. Organisations such as ELOG in Kenya, YIAGA Africa in Nigeria, the National Democratic Institute internationally, and the Carter Center have refined PVT over decades. It works: a sufficiently large random sample of polling stations, each observed by a trained representative, produces a statistically reliable independent count.
-
-The limitation is organisational. PVT requires a large trained observer corps, centralised data collection, and a credentialed organisation that can withstand government pressure. In the most contested environments, precisely where PVT is most needed, the organisational requirements become the binding constraint.
+Parallel Vote Tabulation (PVT) is the established methodology for independent election monitoring, refined over decades by organisations such as ELOG (Kenya), YIAGA Africa (Nigeria), NDI, and the Carter Center. The methodology is sound; a sufficiently large random sample of trained observers produces a statistically reliable independent count. Its limitation is organisational: in the most contested environments — precisely where PVT is most needed — the requirement for a credentialed observer corps becomes the binding constraint.
 
 ### 1.3 What PeerPulse Does
 
 PeerPulse makes PVT-class witnessing available to any citizen with an Android device, without requiring a credentialed organisation, a central server, or internet connectivity. Critically, it requires no pre-coordination among observers. A citizen does not need to register with any organisation, attend any briefing, or arrange to meet any other observer before election day. They download the app, go to their polling station, and the protocol handles the rest.
 
-The platform extends beyond election day. PeerPulse is organised as four interlocking pillars:
-
-| Pillar | What it does | When |
-|---|---|---|
-| **Elections** | Citizens independently count and co-sign official tallies posted at the station entrance | Election day |
-| **Surveys** | Governments and accredited organisations publish targeted opinion surveys to opted-in citizens; results aggregate pseudonymously on-device | Continuous |
-| **Journal** | AI-extracted neutral summaries of parliamentary, executive, judicial, and budget proceedings, with citations to primary sources, translated to local languages | Continuous |
-| **Learn** | Curated civic education content and quizzes, know your rights, understand how elections work, understand the budget process | Continuous |
-
-Each pillar reinforces the others. A citizen who learns through Learn is more likely to submit a tally through Elections. A citizen who follows Journal knows what is at stake in an election. Surveys close the loop by letting organisations ask targeted questions of engaged citizens. Together they create a platform citizens open year-round, not only on election day.
-
-This paper focuses primarily on the Elections pillar, where the cryptographic protocol is most developed. The other three pillars are summarised in §§9–11 and specified fully in their own documents.
+PeerPulse the platform also includes civic-polling, civic-summary, and civic-education surfaces that share the same network and trust infrastructure. Those surfaces are specified in companion documents. This paper covers only the Elections protocol.
 
 ## 2. Core Insight: Triple Presence as Proof
 
@@ -78,29 +63,17 @@ A receiving node can verify, fully offline, that this report came from a real An
 
 The power of this proof is not that the devices trust each other. They are strangers. The power is that fabricating it requires deploying real hardware to the correct location at the correct time, capturing a photograph of the posted tally, and producing a TEE-backed signature, all while sustaining mutual BLE attestation with other devices that an attacker does not control. A remote attacker with a laptop cannot replicate any of these properties. A local attacker with a phone farm faces logistical constraints that scale poorly against a genuine observer corps.
 
-**No meeting before election day. No organisation. No accreditation. Just: show up, witness, submit.**
-
 ## 3. System Overview
 
 ### 3.1 Applications
 
-PeerPulse ships as two citizen-and-operator applications and one public website, all consuming a shared protocol library:
+The mobile app (Expo / React Native, Android-only) is the only protocol-participating client. A desktop operator surface (Electron) and a public website at `peerpulse.app` consume the same packet stream for monitoring and information but do not originate tally submissions.
 
-| Application | Platform | Role |
-|---|---|---|
-| **Mobile** | Expo / React Native, Android only | All citizen features, observation, surveys, BLE station presence, hardware attestation, APK self-distribution |
-| **Desktop** | Electron + React renderer | All infrastructure features, war room, network map, relay management, tally centre |
-| **Website** | Next.js 15, `peerpulse.app` | Public marketing, APK download, whitepaper, live election index, B2G landing |
+There is no citizen-facing web application. Web applications can be blocked by government DNS interference or network-level filtering; an Android APK distributed person-to-person is significantly harder to suppress.
 
-There is no citizen-facing web application. Web applications can be blocked by government DNS interference or network-level filtering. An Android APK distributed person-to-person is significantly harder to suppress than a website. The web app exists only as a public information and monitoring surface; it is never the path by which citizens participate in observation.
+There is no iOS application. Three protocol requirements have no iOS equivalent: a Google-rooted TEE attestation chain bound to a developer-controlled signing certificate (§2, §4.3); continuous foreground BLE advertise-and-scan at the station entrance (§5.1); and sideloadable distribution outside any single corporate gatekeeper (§1.1). Android's 80–90%+ share in target markets (Uganda, Kenya, DRC, Nigeria, Indonesia, the Philippines) makes this a small trade-off in addressable observers and a forced choice rather than a focus decision.
 
-There is no iOS application. Android holds 80–90%+ market share in all primary target markets including Uganda, Kenya, DRC, Nigeria, Indonesia, and the Philippines. Maintaining an iOS port would dilute focus without expanding the addressable observer base.
-
-### 3.2 Shared Protocol Core
-
-All three applications consume `@peerpulse/core`, a TypeScript library containing the complete protocol: packet schema, trust validation, dispute resolution, witness-graph aggregation, hardware attestation verification, and cryptographic primitives. A change to the dispute algorithm propagates to all surfaces from a single source.
-
-### 3.3 Network Topology
+### 3.2 Network Topology
 
 ```mermaid
 graph TB
@@ -129,9 +102,9 @@ graph TB
 
 **Bluetooth Low Energy** carries only cryptographic presence attestations and opportunistic offline sync of missing packets between physically near devices. All tally data ultimately travels over libp2p.
 
-### 3.4 Citizen-First, Authority-Optional
+### 3.3 Citizen-First, Authority-Optional
 
-The application is fully functional with zero official participation. Crowdsourced Green-tier tallies, online surveys signed by NGOs, Journal summaries, and station status signals all operate from day one. Gold and Organisation tiers layer on as governments and NGOs choose to participate. The protocol does not require institutional adoption to provide value, institutional adoption is the second-stage demand-pull, not the precondition for launch.
+The application is fully functional with zero official participation. Crowdsourced Green-tier tallies and station status signals operate from day one. Gold and Organisation tiers layer on as governments and NGOs choose to participate. The protocol does not require institutional adoption to provide value, institutional adoption is the second-stage demand-pull, not the precondition for launch.
 
 ## 4. Elections: Protocol Specification
 
@@ -343,19 +316,13 @@ Citizens stand at the **public station entrance**: the legally mandated area whe
 
 The BLE session accumulates co-presence proof across the entire closing-and-counting window, typically several hours from polls close to results posting, not only the moment of result capture. This produces a denser witness graph than any single-instant ceremony could.
 
-### 5.4 No Pre-Coordination Required
-
-The BLE presence model requires nothing from the observer before election day. There is no briefing to attend, no QR code to exchange in advance, no organisation to register with. An observer who has never heard of PeerPulse, who downloads the app the night before the election and starts witnessing at their station the next morning, will automatically accumulate co-witness attestations from any other PeerPulse users at that entrance.
-
-This is the property that distinguishes the protocol from traditional PVT: **the cost of participation is near zero**. Any citizen who is already going to their polling station can contribute a witnessed tally.
-
 ## 6. Trust Model and Tally Aggregation
 
 ### 6.1 The Seven Tiers
 
 | Tier | Badge | Role | Submits Tallies | Base Weight |
 |---|---|---|---|---|
-| Platform | 💎 Diamond | PeerPulse platform keypair, signs `ElectionDefinition`, `SurveyDefinition` only | No | - |
+| Platform | 💎 Diamond | PeerPulse platform keypair, signs metadata packets only | No | - |
 | Government | 🥇 Gold | Electoral commissions and official state bodies | Yes | 1000 |
 | Organisation, NGO/CSO | 🔵 Org-NGO | Civil society, observer missions, accredited NGOs | Yes | 500 |
 | Organisation, Press | 📰 Org-Press | Accredited media organisations and journalists | Yes | 500 |
@@ -363,7 +330,7 @@ This is the property that distinguishes the protocol from traditional PVT: **the
 | Attested Citizen | 🟢 Green | Citizens with valid BLE WitnessBundle | Yes | 100 |
 | Reported Citizen | 🟡 Yellow | Citizens without BLE attestation | Yes | 1 |
 
-The Gold : Org : Green : Yellow ratio (1000 : 500 : 100 : 1) is calibrated against realistic observation density. In Kenya's polling stations (478 registered voters on average, ~65% turnout, ~10–15% PeerPulse penetration in a high-mobilisation deployment), roughly 15 PeerPulse-equipped citizens are realistically present at a contested count. The Green base of 100 lets a 15-citizen cluster decisively override a single contradicting Gold submission, while leaving Gold and Organisation as clearly premium institutional tiers when uncontested.
+The 1000 : 500 : 100 : 1 ratio is calibrated so that a 15-citizen BLE cluster — the realistic per-station observer density in target markets — can decisively override a single contradicting Gold submission, while keeping Gold and Organisation as clearly premium tiers when uncontested.
 
 **Diamond.** The PeerPulse relay holds a persistent Ed25519 platform keypair, pinned in the mobile app at build time. Diamond signs metadata packets only. A `TallyPacket` referencing the Diamond key is rejected outright. Diamond establishes the authoritative list of elections without granting any authority over results.
 
@@ -374,8 +341,6 @@ The Gold : Org : Green : Yellow ratio (1000 : 500 : 100 : 1) is calibrated again
 Political party submissions are always rendered in the UI with the party name visible. A station whose winning cluster is dominated by one party with no cross-party corroboration triggers an automatic CONTESTED override regardless of weight arithmetic, single-party dominance without challenge is not the value the protocol provides.
 
 **Green.** Any citizen who starts witnessing, runs the BLE foreground service, and accumulates at least one valid mutual BLE attestation before submitting. No registration beyond on-device key generation. Base weight 100. Photo submission is encouraged for dispute-review value but does not multiply citizen weight, photo participation in safety-sensitive environments runs around 10%, and gating override power on photos would push the citizen threshold beyond achievable observer density.
-
-**Yellow.** A citizen who submitted a tally with no valid WitnessBundle, BLE unavailable, submitted remotely, or no other PeerPulse users at the station. Recorded and visible but with no connectivity boost.
 
 ### 6.2 PKI Hierarchy
 
@@ -489,33 +454,11 @@ else:
 | CONFIRMED | ✅ | Result confirmed with institutional corroboration |
 | CITIZEN-CONFIRMED | ✅🟢 | Result confirmed by citizens; Gold/Org may be present but in losing cluster |
 | CONTESTED | ⚠️ | Two clusters are competitive, observers notified |
-| DEADLOCKED | 🔴 | No cluster dominates, War Room alert |
+| DEADLOCKED | 🔴 | No cluster dominates, operator alert |
 
-**Minimum quorum rule.** CONFIRMED requires at least one Gold or Organisation slot **in the winning cluster**: citizen weight alone cannot produce CONFIRMED. Without institutional corroboration in the winning cluster, the maximum achievable state is CITIZEN-CONFIRMED (subject to the TEE citizen threshold) or LEADING.
-
-The rationale is realistic: the threat at a polling station is not mass citizen fraud, citizens all watch the same physical count. The realistic threat is an insider (corrupt official or party agent) submitting a false tally. The quorum rule ensures that citizen submissions can either **corroborate** institutional submissions (CONFIRMED) or **override** them with decisive supermajority and presence proof (CITIZEN-CONFIRMED). The override case is the politically loaded state: it indicates an institutional submission was contradicted by a strong citizen consensus, the strongest publicly verifiable signal of institutional fraud the protocol produces.
+**Minimum quorum rule.** CONFIRMED requires at least one Gold or Organisation slot **in the winning cluster**: citizen weight alone cannot produce CONFIRMED. Without institutional corroboration in the winning cluster, the maximum achievable state is CITIZEN-CONFIRMED (subject to the TEE citizen threshold) or LEADING. The override case — winning cluster citizen-only, runner cluster Gold/Org — is the politically loaded state: the strongest publicly verifiable signal of institutional fraud the protocol produces.
 
 **Worked example.** 15 Green citizens in one BLE cluster (n=14, multiplier ≈ 4.91) submitting the same tally produce 15 × 100 × 4.91 ≈ **7,365** effective weight. A single Gold submission to a contradicting tally, with photo and the ×2.0 multiplier cap, produces **2,000**. The 3.68× ratio satisfies the 3× confirmation rule, and the winning cluster contains ≥10 TEE-attested Greens → CITIZEN-CONFIRMED. This is the operational anchor: 15 honest TEE-attested citizens can produce a green confirmation against an objecting Gold.
-
-```mermaid
-flowchart TD
-  A[Recompute witness graph<br/>and effective weights] --> G{winning ≥ 3× runner?}
-  G -->|Yes| H{Gold or Org in winning cluster?}
-  H -->|Yes| I([✅ CONFIRMED])
-  H -->|No| J{≥10 TEE Green in winning?}
-  J -->|Yes| K(["✅🟢 CITIZEN-CONFIRMED<br/>(Gold/Org may be in runner)"])
-  J -->|No| L([🔵 LEADING])
-  G -->|No| M{runner ≥ DISPUTE_THRESHOLD?}
-  M -->|No| L
-  M -->|Yes| N{within 25% of winning?}
-  N -->|Yes| O([🔴 DEADLOCKED])
-  N -->|No| P([⚠️ CONTESTED])
-  style I fill:#0c1222,stroke:#22c55e,color:#dce8f8
-  style K fill:#0c1222,stroke:#22c55e,color:#dce8f8
-  style L fill:#0c1222,stroke:#60a5fa,color:#dce8f8
-  style O fill:#0c1222,stroke:#ef4444,color:#dce8f8
-  style P fill:#0c1222,stroke:#eab308,color:#dce8f8
-```
 
 ### 6.7 The Evidence Window
 
@@ -583,29 +526,11 @@ Transport protocols in use:
 - **mDNS**: local network discovery without internet
 - **Bluetooth Low Energy**: presence attestation and opportunistic offline sync
 
-### 8.2 Mobile Shim Stack
+### 8.2 Offline-First Operation
 
-The Hermes JavaScript engine on React Native does not implement Node.js standard library. To bring libp2p to mobile, the following shims are required:
+The network degrades gracefully under infrastructure pressure: internet relays → LAN mDNS → BLE person-to-person. A tally captured in a remote area with no connectivity will propagate outward hop-by-hop as observers travel, eventually reaching a Sovereign Relay.
 
-| Node API | Shim |
-|---|---|
-| `node:crypto` | `react-native-quick-crypto` v1.x (backed by `@noble/curves`) + `@peculiar/webcrypto` |
-| `node:net` | `react-native-tcp-socket` |
-| `node:stream` | `stream-browserify` |
-| `Buffer` | `@craftzdog/react-native-buffer` |
-| `crypto.getRandomValues` | `react-native-get-random-values` |
-| `CustomEvent` / `EventTarget` | `event-target-shim` |
-| `Promise.withResolvers` | inline polyfill |
-
-The shim layer is configured identically in `babel.config.js` and `metro.config.js`. The `expo-build-properties` plugin sets `compileSdkVersion 35`, `minSdkVersion 24`, `kotlinVersion 1.9.24`.
-
-### 8.3 Offline-First Operation
-
-A group of monitors sharing a local Wi-Fi network discover each other via mDNS and gossip over TCP with no internet. When internet is unavailable entirely, Bluetooth Low Energy provides a further fallback: devices physically near each other exchange missing records over BLE. A tally captured in a remote area with no connectivity will propagate outward hop-by-hop as observers travel, eventually reaching a Sovereign Relay.
-
-This layered approach, internet relays → LAN mDNS → BLE person-to-person, means the network degrades gracefully under infrastructure pressure rather than failing.
-
-### 8.4 Sovereign Relays
+### 8.3 Sovereign Relays
 
 Sovereign Relays run `apps/node`: a headless Node.js binary running libp2p, an HTTP info endpoint on port 9876, and a WebSocket listener on port 9090. They are identified by a pre-shared key rather than a domain name, which means their addresses can be distributed out-of-band and are resistant to DNS blocking.
 
@@ -613,179 +538,9 @@ Any organisation can operate a Sovereign Relay using the public Docker image. A 
 
 Minimum deployment: 3 Sovereign Relays per election, with at least 2 in the target country and 1 external. Hosting recommendations are 1984 Hosting (Iceland) or Mullvad, jurisdictions with strong press freedom protections and no US/UK exposure. Anonymous registration; Monero payments.
 
-### 8.5 APK Self-Distribution
+## 9. Security Analysis
 
-The mobile application is its own distribution network.
-
-**Via Android share sheet.** The application reads its own APK path from the Android `PackageManager`, creates a `FileProvider` content URI, and offers it via the standard share sheet. The APK can be sent via WhatsApp, Telegram, Bluetooth, or any file-sharing application.
-
-```typescript
-const apkPath = await getApplicationApkPath();
-const uri     = await getFileProviderUri(apkPath);
-await Share.share({ url: uri, mimeType: 'application/vnd.android.package-archive' });
-```
-
-**Via local mDNS HTTP server.** When a user opens the Share screen, the application advertises itself on the local network on port 7732 under the service `_peerpulse-install._tcp.local`. Nearby devices can download the APK by opening a URL in their browser, no internet required.
-
-One field coordinator downloads the application once. From there it propagates person-to-person with no dependency on `peerpulse.app`, the Play Store, or any other central infrastructure.
-
-### 8.6 Why No Google Play Store
-
-PeerPulse is not on the Google Play Store. Three reasons:
-
-**The Navalny precedent.** In September 2021, Google removed Navalny's Smart Voting app from the Russian Play Store under direct government pressure, days before a federal election. This is PeerPulse's exact threat model.
-
-**Developer identity.** A Google Play developer account requires identity verification and payment traceability. Google is a US company subject to subpoena.
-
-**Policy conflict.** Google Play prohibits apps that facilitate installation of APKs from outside the Play Store. PeerPulse's self-distribution feature is that feature.
-
-Distribution flows through **F-Droid**, direct APK download at `peerpulse.app/download` (Njalla-registered, Swedish jurisdiction), and APK self-distribution from within the app itself.
-
-## 9. Surveys
-
-PeerPulse includes a targeted civic polling feature deliberately separate from election observation in both the UI and the protocol.
-
-### 9.1 Publisher Eligibility
-
-Only credentialed entities may publish surveys. Self-service is not available.
-
-| Tier | Who | Certification |
-|---|---|---|
-| 💎 Diamond | PeerPulse platform | Built-in, for system surveys only |
-| 🥇 Gold | Electoral commissions, state bodies | Via GovernmentSubCA |
-| 🔵 Org-NGO | NGOs, observer missions | Via ObserverSubCA, `org_type=ngo` |
-| 📰 Org-Press | Media organisations | Via ObserverSubCA, `org_type=press` |
-| 🏛️ Org-Party | Registered political parties | Via ObserverSubCA, `org_type=party` |
-
-Unsigned `SurveyDefinition` packets are rejected by all nodes. A citizen cannot publish a survey. Political party surveys are rendered with the publishing party's name prominently displayed.
-
-### 9.2 Demographic Targeting
-
-Poll creators may specify targeting criteria:
-
-```protobuf
-message Targeting {
-  repeated string age_ranges   = 1;
-  repeated string regions      = 2;   // ISO 3166-2
-  repeated string genders      = 3;
-  repeated string occupations  = 4;
-  repeated string languages    = 5;   // BCP 47
-  repeated string education    = 6;
-}
-```
-
-**Targeting is enforced entirely on the receiving device.** The `SurveyDefinition` packet is gossipped to all nodes regardless of targeting. Each device checks targeting against its local demographic profile and displays only matching surveys. **No party ever learns which devices matched which criteria.** Demographics never leave the device and are never included in any packet.
-
-Users explicitly opt in to survey targeting as a separate setting. Users who opt out see only untargeted surveys.
-
-### 9.3 Eligibility Tiers
-
-| Tier | Requirement | Use case |
-|---|---|---|
-| `open` | Any device that received the survey | General sentiment, research |
-| `witnessed` | Valid WitnessBundle in `VotePacket` | Surveys requiring confirmed physical presence at a station |
-| `credentialed` | Gold or Organisation cert chain | Peer-organisation or official surveys |
-
-### 9.4 Vote Privacy
-
-v1 uses pseudonymous device-bound voting. Votes are tied to a device keypair, not a real identity, but are not anonymous. Full cryptographic anonymity using zero-knowledge proofs (e.g. Semaphore) is deferred to a future protocol version. Applications must not represent v1 polling as anonymous to participants.
-
-### 9.5 Result Aggregation
-
-Nodes tally `VotePackets` locally. Publishers query any Sovereign Relay for aggregated tallies. Deduplication is one VotePacket per (`device presence_pub_key`, `survey_id`); later submissions from the same key overwrite earlier ones within the survey window. Publishers receive aggregate counts and an eligibility breakdown but never per-device data nor breakdowns by demographic segment, segment breakdowns would allow re-identification.
-
-## 10. Journal
-
-Journal is an AI-powered pipeline that monitors official government sources, extracts structured summaries of proceedings, and delivers them to citizens in plain language and local languages, with direct citations back to primary documents.
-
-**What Journal covers:**
-
-- Parliamentary debates and Hansard
-- Executive orders, gazette notices, cabinet decisions
-- Court rulings, constitutional, supreme, tribunal
-- Budget statements, treasury reports, audit reports
-- Electoral commission publications
-- Bills and constitutional amendments at every reading stage
-
-**What Journal is not:**
-
-- Not editorial. No opinion. No framing beyond what the primary source says.
-- Not a news aggregator. Source is always the official record, not a media report.
-
-**Why neutrality is defensible.** Extraction from official government documents cannot be accused of bias by the government whose documents are the source. Citations link to the primary document so any reader can verify the summary against the original.
-
-### 10.1 Architecture
-
-```
-Official sources (parliament · gazette · court · treasury)
-        ↓
-Source Monitors (per-workstream crawlers)
-        ↓
-Extraction Agent (AI → structured data from raw text)
-        ↓
-Validation Pipeline
-  ├── Bias Checker (adversarial AI pass)
-  ├── Citation Verifier (every claim has a source anchor)
-  └── Human Review Gate (high-sensitivity content only)
-        ↓
-Translation Agent (local languages per jurisdiction)
-        ↓
-JournalPacket (signed by Journal node keypair)
-        ↓
-GossipSub → Sovereign Relays → Mobile app + Website
-```
-
-The extraction agent operates under a strict system prompt prohibiting evaluative or intent-attributing language ("controversial", "aims to", "significant") and requiring every claim to be traceable to a specific section of the source document. A separate bias-checker agent runs an adversarial pass on the output, its only job is to find problems. After two failed revision cycles, content is routed to designated jurisdiction-specific human reviewers.
-
-### 10.2 Journal Nodes
-
-A **Journal node** is a dedicated operator running the full AI extraction pipeline and publishing `JournalPacket`s to the network. Journal nodes are distinct from Sovereign Relays. PeerPulse operates at least one Sovereign Journal node per active election jurisdiction. Community Journal nodes may supplement coverage; their packets are displayed with a community badge until they accumulate a reputation score based on citation accuracy, bias audit pass rate, and timeliness.
-
-### 10.3 Distribution
-
-`JournalPackets` are delivered to the mobile app via GossipSub. Citizens subscribe to jurisdictions and workstreams. Journal summaries are also rendered as static pages on `peerpulse.app/journal/[jurisdiction]/[workstream]/[journal_id]`, optimised for journalist and researcher search queries. A daily or weekly WhatsApp/Telegram digest is the primary distribution channel in markets where WhatsApp exceeds Google as a news discovery surface.
-
-## 11. Learn
-
-Learn is the civic education pillar: short-form curated content and interactive quizzes covering electoral law, parliamentary process, the budget cycle, and citizen rights. Content is localised per jurisdiction (Kenyan electoral law differs from DRC's). Citizens earn civic literacy badges as they complete modules.
-
-Learn serves two functions in the platform economy. First, it is the **retention engine**: Elections is event-driven and Surveys is intermittent; Learn provides a year-round reason to open the app. Second, it is the **onboarding funnel**: new users learn how the platform works through Learn before they need it for a live election.
-
-NGOs and civil society organisations can sponsor Learn modules for specific civic education campaigns. Sponsored modules go through the same extraction and review pipeline as unsponsored ones. Sponsors do not influence content.
-
-Learn has not yet been specified at the protocol level. The pillar is included here for completeness; full specification follows when Learn moves to implementation.
-
-## 12. Data Persistence
-
-All packet data is stored in an append-only local SQLite database. There are no `UPDATE` or `DELETE` operations on core packet tables. Trust and dispute status changes write new rows rather than modifying existing ones, providing a local audit trail that cannot be retroactively altered.
-
-```sql
-CREATE TABLE tallies (
-  packet_id        TEXT PRIMARY KEY,
-  election_id      TEXT NOT NULL,
-  station_id       TEXT NOT NULL,
-  candidate_id     TEXT NOT NULL,
-  vote_count       INTEGER NOT NULL,
-  witness_count    INTEGER NOT NULL DEFAULT 0,
-  effective_weight INTEGER NOT NULL DEFAULT 0,
-  trust_tier       TEXT NOT NULL,            -- 'gold' | 'organisation' | 'green' | 'yellow'
-  org_id           TEXT,                     -- entity deduplication (Gold/Org)
-  hw_attested      INTEGER NOT NULL DEFAULT 0,
-  photo_hash       BLOB,
-  photo_cid        TEXT,
-  dispute_status   TEXT NOT NULL DEFAULT 'leading',
-  received_at      INTEGER NOT NULL,
-  raw_proto        BLOB NOT NULL
-);
-```
-
-The `raw_proto` field stores the complete serialised Protobuf packet. Any party can independently verify a stored tally using only the published protocol specification and the packet bytes, no application code is required for verification.
-
-Demographic profile data is stored in a separate local-only table and is never included in any transmitted packet.
-
-## 13. Security Analysis
-
-### 13.1 Threat Model
+### 9.1 Threat Model
 
 PeerPulse is designed against adversaries who:
 
@@ -800,7 +555,7 @@ PeerPulse is **not** designed against adversaries who:
 - Can physically deploy large numbers of real TEE-attested Android devices to every contested station simultaneously
 - Control 3 of 5 root CA key holders acting in concert
 
-### 13.2 Realistic Threats and Defences
+### 9.2 Realistic Threats and Defences
 
 PeerPulse's threat model is grounded in how election fraud actually happens at counting stations. The mass-device attack (50 phones brought to a station) is theoretically analysable but operationally implausible at scale, the count is a public, witnessed event and everyone in the room sees the same physical tally sheet. The realistic threats are:
 
@@ -812,7 +567,7 @@ PeerPulse's threat model is grounded in how election fraud actually happens at c
 | **Compromised Org key** | A legitimate Org's key is stolen or coerced | Entity cap (one slot per org), revocation, cross-station consistency check |
 | **Suppression** | Intimidation or phone confiscation prevents honest submissions | Offline queue, BLE relay, social/legal, out of protocol scope |
 
-### 13.3 Honest Majority Principle
+### 9.3 Honest Majority Principle
 
 Within the citizen tier, the PeerPulse aggregation model guarantees: **if the majority of citizens physically present at a station submit honestly, the correct result wins.**
 
@@ -820,13 +575,13 @@ Within a connected BLE component, all citizens have `n ≈ (total_submitters −
 
 This holds whether dishonest citizens BLE with honest ones (same multiplier, count vote) or form their own cluster (orphan penalty further reduces their weight). The principle breaks only if the citizen majority **and** the institutional tier at the same station are simultaneously corrupt, operationally implausible in a normal counting environment where party agents from opposing parties are present.
 
-### 13.4 Cost of Attack at Scale
+### 9.4 Cost of Attack at Scale
 
-The TEE hardware attestation requirement prices out software Sybil attacks. Physical device farms (real Android hardware) cost $150–300 per device. At 10,000 stations with 50 devices per station, a nationwide physical infiltration attack costs $75–150M in hardware alone, requires coordinated physical presence at every station simultaneously, and every participant is a potential defector.
+The TEE hardware attestation requirement prices out software Sybil attacks. Physical device farms (real Android hardware) cost USD 150–300 per device. At 10,000 stations with 50 devices per station, a nationwide physical infiltration attack costs USD 75–150M in hardware alone, requires coordinated physical presence at every station simultaneously, and every participant is a potential defector.
 
 The full Sybil-resistance picture: an attacker must (i) procure TEE-attested Android devices at scale, (ii) deploy them physically to specific stations, (iii) maintain mutual BLE attestation among them without being detected as a closed clique, (iv) produce GPS coordinates inside the plausibility radius, and (v) photograph the actual posted tally, which constrains what numbers can be submitted to what the rest of the room can also see.
 
-### 13.5 Cryptographic Validation Suite
+### 9.5 Cryptographic Validation Suite
 
 | Case | Expected |
 |---|---|
@@ -847,76 +602,12 @@ The full Sybil-resistance picture: an attacker must (i) procure TEE-attested And
 | HW attestation: wrong APK signing cert | Rejected |
 | HW attestation: challenge mismatch | Rejected |
 | Tampered WitnessBundle attestation | Rejected |
-| Duplicate VotePacket same device+survey | Second rejected |
 
-## 14. Strategic Resilience
+## 10. Privacy Considerations
 
-The cryptographic protocol is necessary but not sufficient. PeerPulse's resilience derives equally from three structural properties of how the protocol interacts with political reality.
+### 10.1 What Is Visible on the Network
 
-### 14.1 The Legitimacy Inversion
-
-Today, an official election result is *the* result unless fraud is proven. The burden falls on challengers. PeerPulse shifts the political default. Once the protocol reaches critical mass in a jurisdiction, a new category exists: a **verified** result, confirmed by cryptographic citizen evidence. A result with no parallel count, or one where verification was blocked, carries an implicit question the incumbent must answer: *Why wasn't this verified?*
-
-The counterintuitive consequence: **the candidates with the strongest incentive to want PeerPulse are the ones who actually win.** A rigged win requires no verification. A real win benefits enormously from unimpeachable verification, cryptographic proof that no court challenge, no opposition campaign, and no foreign government can invalidate after the fact.
-
-In a contested race with two serious candidates, the candidate who knows they will win legitimately has every incentive to invite verification. The candidate who requires opacity has every incentive to block it, and blocking it is now its own signal.
-
-Once one election in a region is PeerPulse-verified, every subsequent unverified election is implicitly incomplete. This is the HTTPS pattern: optional at first, then browsers labelled HTTP sites "Not Secure", then HTTP became the liability. The default flipped.
-
-### 14.2 The Shutdown Boomerang
-
-A government shuts down the internet on election day to suppress real-time verification: cut communications → delay reporting → buy time to manipulate or dispute results before international pressure mounts.
-
-PeerPulse inverts this calculus entirely. A shutdown cannot stop:
-
-- **BLE witnessing.** Bluetooth operates independently of internet.
-- **Local signing.** Ed25519 signing is on-device; the private key never leaves the phone.
-- **SQLite storage.** Every packet is persisted locally; packets accumulate across all observer devices simultaneously.
-- **LAN gossip.** Observers in coordination centres gossip packets via mDNS over shared Wi-Fi with no internet.
-
-When internet restores, the relay receives a flood of packets created, signed, and witnessed **during** the shutdown. Critically:
-
-- `timestamp` is inside the signed payload, it cannot be backdated.
-- The TEE attestation proves the key was on real hardware at that moment.
-- GPS coordinates place the device at a specific location at a specific time.
-- BLE witness counts that accumulated *because* observers were cut off from the relay and had to wait together at station entrances are denser than they would have been without the shutdown.
-
-A shutdown without PeerPulse buys time. A shutdown with PeerPulse deployed at scale buys condemnation and no time. The government has stronger incentive **not to shut down at all**.
-
-### 14.3 Ban Resistance
-
-A government bans Telegram: pressure Apple and Google to remove it from app stores, block at the network level via ISP-mandated DNS or DPI. This works because the product lives at seizable points: the store listing, the company identity, the server infrastructure. PeerPulse has none of those.
-
-| Vector | Effectiveness | Why |
-|---|---|---|
-| App store removal | None | Not on Google Play by design |
-| Block download domain | Low | Njalla-registered Swedish jurisdiction; APK share sheet propagates via WhatsApp before any block takes effect; blocking WhatsApp is its own international incident |
-| Seize relay servers | Low | 1984 Hosting Iceland, anonymous registration, Monero payments; MLAT to Iceland requires years and a crime under Icelandic law; LAN gossip continues without any relay |
-| Internet shutdown | Counterproductive | See §14.2 |
-| Make app illegal | High cost, low effect | Criminalising parallel vote tabulation when tens of thousands of civil society observers are active generates the global story before the election does; cannot invalidate signed data already on phones |
-| Confiscate phones | Visible, bounded | Mass confiscation at scale requires a documented security operation that generates its own international condemnation; data on other phones is unaffected |
-| Fake APK at download | None | APK signing key on air-gapped machine, never linked to any identity; mismatched signature fingerprint is detected on install; SHA-256 checksum lets anyone verify before installing |
-| Compromise PKI root | Hard | 3-of-5 threshold HSM-backed signing; Swiss Foundation legal structure; MLAT proceedings under Swiss law |
-| DPI / traffic blocking | Moderate, defeatable | libp2p Noise encryption; traffic can be tunnelled; same mitigations as Signal/Tor |
-
-Every suppression attempt that becomes visible, a domain block, an ISP order, an observer arrested, feeds the exact press narrative that makes PeerPulse's evidence credible. **The attempt to suppress is stronger evidence of intent than any discrepancy in the tally.**
-
-PeerPulse is a protocol, not a service. Once data is signed, timestamped, and stored on a critical mass of phones, no ban issued after that moment can make it not exist.
-
-### 14.4 Honest Limits
-
-PeerPulse cannot protect against:
-
-- **Physical violence against observers.** The app does not stop arrests, beatings, or intimidation at stations. Mitigation: civil society seeding deploys observers in groups with legal support; each incident is itself a documented international story.
-- **Chilling effects from legal uncertainty.** In a jurisdiction where parallel tallying has not been explicitly reviewed and cleared, legal ambiguity suppresses participation without any actual ban. Mitigation: jurisdiction-specific legal review is a pre-deployment requirement.
-- **Pre-election suppression of the civil society partner.** If a primary partner organisation is shut down before the election, the observer corps does not form. Mitigation: distribute seeding across multiple independent civil society organisations.
-- **Early bans before installation reaches scale.** A government that bans and blocks before the app reaches a critical mass of installed devices prevents the self-distribution network from forming. Mitigation: the 4–6-month seeding window is non-negotiable.
-
-## 15. Privacy Considerations
-
-### 15.1 What Is Visible on the Network
-
-All `TallyPacket`, `IntentPacket`, `WitnessStartPacket`, `SurveyDefinition`, and `VotePacket` data is broadcast publicly over GossipSub. Any node can observe all packets. The following information is therefore public:
+All `TallyPacket`, `IntentPacket`, and `WitnessStartPacket` data is broadcast publicly over GossipSub. Any node can observe all packets. The following information is therefore public:
 
 - Station ID and election ID of every submission
 - Public key associated with each submission
@@ -925,7 +616,7 @@ All `TallyPacket`, `IntentPacket`, `WitnessStartPacket`, `SurveyDefinition`, and
 - GPS coordinates of capture
 - WitnessBundle public keys (but not the real-world identities behind them)
 
-### 15.2 What Is Not Visible
+### 10.2 What Is Not Visible
 
 - Private key material used to sign any packet
 - Real-world identity of any participant, there is no identity registration in the protocol
@@ -934,81 +625,13 @@ All `TallyPacket`, `IntentPacket`, `WitnessStartPacket`, `SurveyDefinition`, and
 - Demographic profile data, stored locally only, never transmitted
 - The plaintext of encrypted photos until the threshold key (3-of-5 root co-signers) authorises decryption for dispute review
 
-### 15.3 Linkability
+### 10.3 Linkability
 
 Session keypairs are scoped to a single election and station, limiting long-term linkability for tally submissions. Long-term device keypairs (used for `IntentPacket` and `WitnessStartPacket`) carry higher linkability risk across elections.
 
 Participants in high-risk environments should be advised that their participation pattern, which elections and stations they observe, is visible to any network observer. GPS coordinates are signed in every TallyPacket; a participant's station appearances are publicly auditable.
 
-## 16. Operations
-
-### 16.1 Election Lifecycle
-
-| Phase | When | Key actions |
-|---|---|---|
-| **Setup** | 4–6 weeks before | Publish `ElectionDefinition`, issue Gold/Org certs, deploy relays |
-| **Seeding** | 4–6 weeks before | Civil society outreach, APK distribution, pilot run |
-| **Pre-election** | Up to election day | `IntentPacket` accumulation; station map population |
-| **Election day** | Count period | `WitnessStartPacket`, BLE ceremony, `TallyPacket` submission |
-| **Evidence window** | 48 h post-result | Contradicting submissions accepted; photos pinned |
-| **Lock** | 48 h after CONFIRMED | Results immutable; photos retained for 90 days |
-
-### 16.2 Organisation Onboarding
-
-Applications submitted to `certify@peerpulse.app` with legal registration certificate, target election, and number of observer devices. PeerPulse manually verifies legal existence. Turnaround 5–10 business days. Cert issuance requires 3-of-5 root co-signers. Commercial terms — including any setup or per-leaf charges — are not published in this whitepaper. First-election certs for civil society partners in target markets may be subsidised or zero-cost at PeerPulse's discretion. The citizen network is the GTM motion; institutional engagement follows adoption.
-
-### 16.3 Monitoring and Anomaly Detection
-
-The Desktop war room and Website monitoring surface display per-station: submission count, witness density, confirmation state, photo coverage, `hw_attested` ratio, split-witness flag, orphan count. Automatic flags trigger Diamond-tier operator review on:
-
-- Orphan ratio > 20%
-- Station submission count > 3× historical average for similar stations
-- Burst timing: ≥ 5 submissions from the same station within 500ms
-- Organisation outlier pattern: > 30% of an org's stations CONTESTED or DEADLOCKED
-- Gold/Org submission missing photo
-- Split-witness within 20% base weight
-- Low witness density (≥ 3 submissions, average `n` < 1)
-
-### 16.4 War Room SLAs
-
-| Severity | Definition | Response | Resolution |
-|---|---|---|---|
-| P0 | Network partition | 15 min | 2 h |
-| P1 | Relay failure | 30 min | 4 h |
-| P2 | Credential issue | 1 h | 8 h |
-| P3 | UI display issue | 4 h | Next business day |
-
-## 17. Operational Security
-
-### 17.1 Asset Protection
-
-| Asset | Tool | Rationale |
-|---|---|---|
-| Domain | Njalla | Registered in Njalla's name; Swedish law; no WHOIS trace |
-| Relay servers | 1984 Hosting (Iceland) or Mullvad | Strong press freedom; resistant to informal pressure |
-| Infrastructure payments | Monero | Transaction-private |
-| Code hosting | Pseudonymous GitHub org | VPN/Tor for commits; no personal account linkage |
-| APK signing key | Air-gapped machine; YubiKey storage | Never linked to any identity |
-| Press contact | ProtonMail (`press@peerpulse.app`) | No phone number; E2E encrypted |
-| Operational comms | SimpleX | No phone number; no server stores messages |
-
-### 17.2 APK Signing Key Policy
-
-The APK signing key is the primary long-term identity vector, every distributed APK embeds the certificate fingerprint permanently.
-
-- Generated on an air-gapped machine never connected to the internet
-- Never linked to a Google developer account or any traceable identity
-- Stored on hardware security media in at least two geographic locations
-- Treated with the same custody policy as PKI root key shares
-- If compromised: all installed copies cannot update in-place and must reinstall from a fresh APK
-
-### 17.3 Legal Structure
-
-**Phase 1 (through first viral election):** No incorporated entity. The protocol is open-source software released by "PeerPulse contributors." There is no headquarters to raid, no CEO to subpoena.
-
-**Phase 2 (post-MVP):** A Swiss Foundation (*Stiftung*) with a nominee professional council is established to hold protocol IP, the open-source code, and PKI root governance. A Swiss GmbH operates as the commercial arm. The governments PeerPulse targets have no leverage over Switzerland. Compelling Swiss courts to unmask a foundation's beneficial patron requires formal MLAT proceedings demonstrating a crime under Swiss law, election monitoring is not a crime under Swiss law.
-
-## 18. Limitations and Future Work
+## 11. Limitations and Future Work
 
 **Vote anonymity.** v7 does not provide anonymous voting. Full cryptographic anonymity using zero-knowledge proofs (Semaphore or equivalent) is a planned future protocol version.
 
@@ -1020,21 +643,13 @@ The APK signing key is the primary long-term identity vector, every distributed 
 
 **Election law.** Parallel vote tabulation occupies a legally ambiguous position in many jurisdictions. Operators deploying the application for a specific election are responsible for obtaining jurisdiction-specific legal counsel. Kenya legal review is complete. Reviews for Nigeria, DRC, Philippines, and Indonesia are pending and tracked in the project's elections pipeline.
 
-**Journal and Learn.** Both pillars are specified at the product level but have not yet been built into the mobile app. Journal seeding (election calendar) is part of the MVP; full Journal extraction and Learn are V3 and V4 respectively.
-
-## 19. Conclusion
+## 12. Conclusion
 
 The most important thing about PeerPulse is what it does not require.
 
 It does not require a citizen to join an organisation. It does not require pre-coordination with other observers. It does not require internet access. It does not require a trusted server. It does not require a government to cooperate.
 
 A citizen goes to their polling station. They stand at the public entrance, the area where, by law, results must be posted after counting. They tap Start Witnessing. Their phone automatically generates a hardware-attested signing key, discovers other PeerPulse users nearby, and silently exchanges cryptographic attestations. When the count concludes and the tally is posted, they photograph it. Their report goes out over a peer-to-peer network with no single point of failure, carrying three independent proofs that they were physically present.
-
-If a thousand citizens do this across a thousand stations, the result is a decentralised parallel count. Each individual report is a data point. Collectively, they are a record, one that no server shutdown, domain block, or app store removal can erase, because it exists on a thousand devices.
-
-The value of that record is not that it proves fraud. It is that it makes fraud harder, more visible, and more expensive. It also makes legitimacy verifiable: the candidate who genuinely won has, for the first time, a cryptographic credential that no challenger can invalidate after the fact.
-
-That is the practical meaning of election integrity: not perfect security, but sufficient transparency that the cost of manipulation exceeds its benefit, and the value of verification exceeds its cost. PeerPulse is a protocol designed so that, for any government expecting to win fairly, **cooperation is the rational choice**.
 
 *PeerPulse is open-source software. The protocol specification, application source code, and this document are published for public review and independent implementation. No entity controls the network.*
 
@@ -1053,19 +668,7 @@ That is the practical meaning of election integrity: not perfect security, but s
 | Root key protection | HSM (hardware-backed), 3-of-5 threshold | Vendor TBD (AWS CloudHSM / Thales / YubiHSM under evaluation) |
 | Photo encryption | Threshold encryption (3-of-5) | TBD |
 
-## Appendix B: Build Gates
-
-Gates pass in order. Status as of May 2026:
-
-| Gate | Test | Pass criteria | Status |
-|---|---|---|---|
-| 0 | libp2p WebSocket node connects to relay | Node starts, dials relay, receives peer ID within 10 s | ✅ Passed |
-| 1 | libp2p TCP LAN gossip | Two devices on same Wi-Fi exchange GossipSub message < 5 s | Next |
-| 2 | BLE WitnessBundle | Two devices at same station auto-exchange attestations via BLE foreground service | Open |
-| 3 | TallyPacket end-to-end | Signed tally gossipped mobile → relay → desktop; dispute algorithm runs correctly | Open |
-| 5 | HW Attestation | TEE-generated keypair produces verifiable chain; offline verification passes; software key rejected | Open |
-
-## Appendix C: Performance Targets
+## Appendix B: Performance Targets
 
 | Metric | Target |
 |---|---|
@@ -1080,13 +683,3 @@ Gates pass in order. Status as of May 2026:
 | Witness graph computation per station | < 100 ms |
 | Malicious packet rejection | 100% |
 
-## Appendix D: Accessibility
-
-All UI surfaces meet **WCAG 2.1 Level AA**:
-
-- Trust tier badges convey status through shape and label, not colour alone
-- Dispute status includes text labels, not just icons
-- All interactive elements reachable via TalkBack (Android)
-- Minimum 4.5 : 1 contrast ratio for body text
-- Demographic profile form fully skippable with one tap
-- Accessibility audit required before any B2G demonstration

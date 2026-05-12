@@ -33,24 +33,54 @@ docs/                 Protocol specs, product docs, outreach
 scripts/              Pseudonymous contributor setup (persona + SSH)
 ```
 
-## Building
+## Development
 
-Requirements: Node 22, pnpm 10.32.1, Docker (for Android builds).
-
-```bash
-pnpm install                            # install all workspaces + generate persona
-pnpm typecheck                          # typecheck everything
-pnpm --filter @peerpulse/node dev       # relay on :9090 (libp2p WS) + :9876 (HTTP)
-pnpm --filter @peerpulse/web dev        # website + playground on :3000
-pnpm --filter @peerpulse/mobile start   # Expo dev server
-```
-
-Build a debug APK (no EAS, no cloud):
+Requirements: Node 22, pnpm 10.32.1, Docker (for Android builds), `adb` (to install on device).
 
 ```bash
-./docker/android-build/build-debug.sh
-# → build/apk/peerpulse-dev.apk
+pnpm install            # install all workspaces + generate persona
+pnpm dev                # everything: relay :9090/:9876, web :3000, Metro :8081
+pnpm typecheck          # typecheck everything
 ```
+
+`pnpm dev` is the normal day-to-day command — one terminal, all three apps running under Turbo. Use the per-app filters below only when you want to run a single surface in isolation.
+
+```bash
+pnpm --filter @peerpulse/node dev       # relay only
+pnpm --filter @peerpulse/web dev        # website + playground only
+pnpm --filter @peerpulse/mobile dev     # Metro only (expo start --dev-client)
+```
+
+### Mobile: dev client workflow
+
+Native modules (libp2p, BLE, expo-camera, TEE attestation) preclude Expo Go. You need a custom **dev client APK** installed on the device once; from there, pure JS edits hot-reload from the dev server and you only reinstall when native deps or Android config change.
+
+1. **Download the latest dev client APK** — CI publishes a rolling build on every change to `apps/mobile/package.json` or `apps/mobile/app.json`:
+
+   <https://github.com/PeerPulseHQ/PeerPulse/releases/download/dev-latest/peerpulse-dev.apk>
+
+   No login required. The build pipeline is in [`.github/workflows/android-dev-client.yml`](./.github/workflows/android-dev-client.yml).
+
+2. **Install on the device:**
+
+   ```bash
+   adb install peerpulse-dev.apk
+   ```
+
+   Or transfer the APK any way (Bluetooth, USB drive, the Android share sheet) and tap to install.
+
+3. **Start the dev server** — `pnpm dev` from the repo root brings up everything including Metro on `:8081`. Open the PeerPulse dev client on the phone (same Wi-Fi as the laptop) and scan the QR.
+
+### Building the APK locally
+
+Only needed if you're modifying native deps, the Android config, or want to test before pushing. Otherwise rely on the CI dev-latest release.
+
+```bash
+./docker/android-build/build-debug.sh     # debug APK   → build/apk/peerpulse-dev.apk
+./docker/android-build/build-release.sh   # signed release APK → build/apk/peerpulse-release.apk
+```
+
+First run builds the base image (~30 min). Subsequent runs reuse it (5–8 min).
 
 ## Tech stack
 
